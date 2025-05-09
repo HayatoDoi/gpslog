@@ -25,7 +25,7 @@ class KML {
         _placemark.appendChild(_name);
         let _point = document.createElement('point');
           let _coordinates = document.createElement('coordinates');
-          _coordinates.innerText = `${latitude},${longitude},0`;
+          _coordinates.innerText = `${longitude},${latitude},0`;
           _point.appendChild(_coordinates);
         _placemark.appendChild(_point);
         let _timespan = document.createElement('timespan');
