@@ -28,7 +28,7 @@
         end: new Date().toISOString().substring(0, 10),
         map: {
           markers: [],
-          center: [0, 0],
+          center: [35.68114, 139.767061],
         }
       }
     },
