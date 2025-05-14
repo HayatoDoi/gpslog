@@ -13,6 +13,9 @@
       <template v-for="marker in map.markers">
         <LMarker :lat-lng="marker" :icon="map.icon" />
       </template>
+      <template v-for="line in map.lines">
+        <LPolyline :lat-lngs="line" color="green" />
+      </template>
     </LMap>
   </div>
   <div>
@@ -29,6 +32,7 @@
         end: new Date().toISOString().substring(0, 10),
         map: {
           markers: [],
+          lines: [],
           center: [35.68114, 139.767061],
           icon: L.icon({
               iconUrl: 'icon.png',
@@ -40,6 +44,7 @@
     methods: {
       async change(e) {
         this.map.markers = [];
+        this.map.lines = [];
         const file = e.target.files[0];
         const text = await file.text();
         const obj = JSON.parse(text);
@@ -62,13 +67,17 @@
             let lstart = element.activity.start.replace('geo:', '').split(',');
             let lend = element.activity.end.replace('geo:', '').split(',');
             let lines = [[lstart[1], lstart[0]], [lend[1], lend[0]]];
+            this.map.lines.push([lstart, lend]);
             kml.addLines(name, lines, begin, end);
           }
           else if (element.timelinePath != undefined) {
             let lines = [];
+            this.map.lines.push([]);
+            const tail = this.map.lines.length - 1;
             element.timelinePath.forEach(path => {
               let location = path.point.replace('geo:', '').split(',');
               lines.push([location[1], location[0]]);
+              this.map.lines[tail].push([location[0], location[1]]);
             });
             kml.addLines(name, lines, begin, end);
           }
