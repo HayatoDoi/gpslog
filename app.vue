@@ -4,14 +4,14 @@
       ref="map"
       :zoom="6"
       :center="map.center"
-      :use-global-leaflet="false"
+      :use-global-leaflet="true"
       style="height: 350px"
     >
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       <template v-for="marker in map.markers">
-        <LMarker :lat-lng="marker" draggable />
+        <LMarker :lat-lng="marker" :icon="map.icon" />
       </template>
     </LMap>
   </div>
@@ -21,6 +21,7 @@
   </div>
 </template>
 <script>
+  import L from 'leaflet'
   export default {
     data () {
       return {
@@ -29,6 +30,10 @@
         map: {
           markers: [],
           center: [35.68114, 139.767061],
+          icon: L.icon({
+              iconUrl: 'icon.png',
+              iconSize: [5, 5],
+          })
         }
       }
     },
