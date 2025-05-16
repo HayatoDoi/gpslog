@@ -51,37 +51,37 @@
           const text = await file.text();
           const obj = JSON.parse(text);
           for (const element of obj) {
-          const name = '';
-          const begin = new Date(element.startTime);
-          const end = new Date(element.endTime);
-          if (begin < new Date(this.begin) || end > new Date(this.end)) {
+            const name = '';
+            const begin = new Date(element.startTime);
+            const end = new Date(element.endTime);
+            if (begin < new Date(this.begin) || end > new Date(this.end)) {
               continue;
-          }
-          if (element.visit !== undefined) {
-            let location = element.visit.topCandidate.placeLocation.replace('geo:', '').split(',');
-            let latitude = location[0];
-            let longitude = location[1];
-            this.map.markers.push([parseFloat(latitude), parseFloat(longitude)]);
-            kml.addPlace(name, latitude, longitude, begin, end);
-          }
-          else if (element.activity !== undefined) {
-            let lstart = element.activity.start.replace('geo:', '').split(',');
-            let lend = element.activity.end.replace('geo:', '').split(',');
-            let lines = [[lstart[1], lstart[0]], [lend[1], lend[0]]];
-            this.map.lines.push([lstart, lend]);
-            kml.addLines(name, lines, begin, end);
-          }
-          else if (element.timelinePath != undefined) {
-            let lines = [];
-            this.map.lines.push([]);
-            const tail = this.map.lines.length - 1;
-            element.timelinePath.forEach(path => {
-              let location = path.point.replace('geo:', '').split(',');
-              lines.push([location[1], location[0]]);
-              this.map.lines[tail].push([location[0], location[1]]);
-            });
-            kml.addLines(name, lines, begin, end);
-          }
+            }
+            if (element.visit !== undefined) {
+              let location = element.visit.topCandidate.placeLocation.replace('geo:', '').split(',');
+              let latitude = location[0];
+              let longitude = location[1];
+              this.map.markers.push([parseFloat(latitude), parseFloat(longitude)]);
+              kml.addPlace(name, latitude, longitude, begin, end);
+            }
+            else if (element.activity !== undefined) {
+              let lstart = element.activity.start.replace('geo:', '').split(',');
+              let lend = element.activity.end.replace('geo:', '').split(',');
+              let lines = [[lstart[1], lstart[0]], [lend[1], lend[0]]];
+              this.map.lines.push([lstart, lend]);
+              kml.addLines(name, lines, begin, end);
+            }
+            else if (element.timelinePath != undefined) {
+              let lines = [];
+              this.map.lines.push([]);
+              const tail = this.map.lines.length - 1;
+              element.timelinePath.forEach(path => {
+                let location = path.point.replace('geo:', '').split(',');
+                lines.push([location[1], location[0]]);
+                this.map.lines[tail].push([location[0], location[1]]);
+              });
+              kml.addLines(name, lines, begin, end);
+            }
           }
         }
         console.log(kml.toString());
