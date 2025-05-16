@@ -19,7 +19,7 @@
     </LMap>
   </div>
   <div>
-    <input type="file" accept=".json" @change="change"><br>
+    <input type="file" accept=".json" multiple @change="change"><br>
     <input v-model="begin" type="date"></input>〜<input v-model="end" type="date"></input>
   </div>
 </template>
@@ -45,16 +45,17 @@
       async change(e) {
         this.map.markers = [];
         this.map.lines = [];
-        const file = e.target.files[0];
-        const text = await file.text();
-        const obj = JSON.parse(text);
         let kml = new this.$KML();
-        obj.forEach(element => {
+        const files = e.target.files;
+        for (const file of files) {
+          const text = await file.text();
+          const obj = JSON.parse(text);
+          for (const element of obj) {
           const name = '';
           const begin = new Date(element.startTime);
           const end = new Date(element.endTime);
           if (begin < new Date(this.begin) || end > new Date(this.end)) {
-            return;
+              continue;
           }
           if (element.visit !== undefined) {
             let location = element.visit.topCandidate.placeLocation.replace('geo:', '').split(',');
@@ -81,7 +82,8 @@
             });
             kml.addLines(name, lines, begin, end);
           }
-        });
+          }
+        }
         console.log(kml.toString());
         this.adjustMap();
       },
