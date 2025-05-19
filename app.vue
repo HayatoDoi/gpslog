@@ -20,7 +20,7 @@
   </div>
   <div>
     <input type="file" accept=".json" multiple @change="change"><br>
-    <input v-model="begin" type="date"></input>〜<input v-model="end" type="date"></input>
+    <input v-model="html_input.begin" type="date"></input>〜<input v-model="html_input.end" type="date"></input>
   </div>
 </template>
 <script>
@@ -28,8 +28,10 @@
   export default {
     data () {
       return {
+        html_input: {
         begin: '1970-01-01',
-        end: new Date().toISOString().substring(0, 10),
+          end: new Date().toISOString().substring(0, 10), // 今日
+        },
         map: {
           markers: [],
           lines: [],
@@ -54,7 +56,7 @@
             const name = '';
             const begin = new Date(element.startTime);
             const end = new Date(element.endTime);
-            if (begin < new Date(this.begin) || end > new Date(this.end)) {
+            if (this.isIncludeHtmlTime(begin, end) === false) {
               continue;
             }
             if (element.visit !== undefined) {
@@ -103,6 +105,18 @@
           west = longitude < west ? longitude : west;
         });
         this.map.center = [(north+south)/2, (east+west)/2];
+      },
+      /* HTMLで指定した期間に引数で指定した期間が含まれるか否か */
+      isIncludeHtmlTime(begin, end) {
+        const time_diff = new Date('1970-01-01T00:00:00.000Z') - new Date('1970-01-01T00:00:00.000'); // 時差(日本なら+09:00)
+        const html_time = {
+          begin: new Date(this.html_input.begin) - time_diff,
+          end: new Date(this.html_input.end) - time_diff + (new Date('1970-01-02T00:00:00.000Z') - 1),
+        };
+        if (begin < html_time.begin || end > html_time.end) {
+          return false;
+        }
+        return true;
       },
     }
   }
