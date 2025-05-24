@@ -17,15 +17,19 @@
       </template>
     </LMap>
   </div>
-  <dev class="map-lock" v-if="page.mode === 'upload'"></dev>
-  <dev class="file" v-if="page.mode === 'upload'">
+  <div class="map-lock" v-if="page.mode === 'upload'"></div>
+  <div class="file" v-if="page.mode === 'upload'">
     <input type="file" accept=".json" multiple @change="import_data">
-  </dev>
-  <dev class="date">
+  </div>
+  <div class="date">
+    <input type="button" value="<<" @click="time_rewind('-month')">
+    <input type="button" value="<" @click="time_rewind('-day')">
     <input v-model="html_input.begin" type="date" @change="update_map"></input>
       〜
     <input v-model="html_input.end" type="date" @change="update_map"></input>
-  </dev>
+    <input type="button" value=">" @click="time_rewind('+day')">
+    <input type="button" value=">>" @click="time_rewind('+month')">
+  </div>
 </template>
 <style>
   body, html, #__nuxt, #__layout, .map, .map-lock, .control {
@@ -98,6 +102,32 @@
         }
         this.update_map();
         this.page.mode = 'view';
+      },
+      /* 日付送り・戻しボタンを押したときに呼び出される関数 */
+      time_rewind(type) {
+        let begin = new Date(this.html_input.begin);
+        let end = new Date(this.html_input.end);
+        switch (type) {
+          case '-month':
+            begin.setMonth(begin.getMonth() - 1);
+            end.setMonth(end.getMonth() - 1);
+            break;
+          case '-day':
+            begin.setDate(begin.getDate() - 1);
+            end.setDate(end.getDate() - 1);
+            break;
+          case '+day':
+            begin.setDate(begin.getDate() + 1);
+            end.setDate(end.getDate() + 1);
+            break;
+          case '+month':
+            begin.setMonth(begin.getMonth() + 1);
+            end.setMonth(end.getMonth() + 1);
+            break;
+        }
+        this.html_input.begin = begin.toISOString().substring(0, 10);
+        this.html_input.end = end.toISOString().substring(0, 10);
+        this.update_map();
       },
       update_map() {
         /* 日付の計算 */
