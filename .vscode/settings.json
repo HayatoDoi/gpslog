@@ -1,0 +1,45 @@
+{
+  // インデント
+  "editor.insertSpaces": true,
+  "editor.tabSize": 4,
+  "editor.detectIndentation": false,
+  "[javascript]": {
+      "editor.tabSize": 2
+  },
+  "[typescript]": {
+      "editor.tabSize": 2
+  },
+  // 自動挿入した空白は削除する
+  "editor.trimAutoWhitespace": true,
+  // 文字コード
+  "files.encoding": "utf8",
+  // 改行コード
+  "files.eol": "\n",
+  // 1行80文字以内に折り返すこと
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 80,
+  "editor.rulers": [80],
+  "workbench.colorCustomizations": {
+      "editorRuler.foreground": "#afafaf"
+  },
+  // 行末に自動改行を入れる
+  "files.insertFinalNewline": true,
+  // 拡張子と言語設定の紐づけ
+  "files.associations":{
+      "*.json": "jsonc",
+  },
+  "files.watcherExclude": {
+      "**/.git/objects/**": true,
+      "**/.git/subtree-cache/**": true,
+      "**/node_modules/**": true,
+      "**/dest": true,
+      "**/ui/.nuxt/**":true,
+  },
+  "files.exclude": {
+      "**/.git": true,
+      "**/dest": true,
+      "**/node_modules": true,
+      "**/core/*.js": true,
+      "**/ui/.nuxt":true,
+  },
+}
