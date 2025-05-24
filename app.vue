@@ -1,11 +1,10 @@
 <template>
-  <div>
+  <div class="map">
     <LMap
       ref="map"
       :zoom="6"
       :center="map.center"
       :use-global-leaflet="true"
-      style="height: 350px"
     >
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -18,11 +17,48 @@
       </template>
     </LMap>
   </div>
-  <div>
-    <input type="file" accept=".json" multiple @change="import_data"><br>
-    <input v-model="html_input.begin" type="date" @change="update_map"></input>〜<input v-model="html_input.end" type="date" @change="update_map"></input>
-  </div>
+  <dev class="map-lock" v-if="page.mode === 'upload'"></dev>
+  <dev class="file" v-if="page.mode === 'upload'">
+    <input type="file" accept=".json" multiple @change="import_data">
+  </dev>
+  <dev class="date">
+    <input v-model="html_input.begin" type="date" @change="update_map"></input>
+      〜
+    <input v-model="html_input.end" type="date" @change="update_map"></input>
+  </dev>
 </template>
+<style>
+  body, html, #__nuxt, #__layout, .map, .map-lock, .control {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+  }
+  .map {
+    position: absolute;
+    z-index: 50;
+  }
+  .map-lock {
+    position: absolute;
+    z-index: 90;
+    background-color: rgba(0, 0, 0, 0.734);
+  }
+  .file {
+    position: absolute;
+    z-index: 100;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: auto;
+  }
+  .date {
+    position: absolute;
+    z-index: 100;
+    top: 100%;
+    left: 50%;
+    height: 50px;
+    transform: translate(-50%, -110%);
+  }
+</style>
 <script>
   import L from 'leaflet'
   const DEFINES = {
@@ -32,6 +68,9 @@
   export default {
     data() {
       return {
+        page: {
+          mode: 'upload',
+        },
         html_input: {
           begin: DEFINES.TODAY,
           end: DEFINES.TODAY,
@@ -58,6 +97,7 @@
           this.raw_data.load(text);
         }
         this.update_map();
+        this.page.mode = 'view';
       },
       update_map() {
         /* 日付の計算 */
