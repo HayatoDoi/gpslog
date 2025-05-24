@@ -25,98 +25,97 @@
 </template>
 <script>
   import L from 'leaflet'
+  const DEFINES = {
+    TOKYO_STATION: [35.68114, 139.767061],
+    TODAY: new Date().toISOString().substring(0, 10),
+  };
   export default {
-    data () {
+    data() {
       return {
         html_input: {
-        begin: '1970-01-01',
-          end: new Date().toISOString().substring(0, 10), // 今日
+          begin: DEFINES.TODAY,
+          end: DEFINES.TODAY,
         },
         map: {
           markers: [],
           lines: [],
-          center: [35.68114, 139.767061],
+          center: DEFINES.TOKYO_STATION,
           icon: L.icon({
-              iconUrl: 'icon.png',
-              iconSize: [5, 5],
+            iconUrl: 'icon.png',
+            iconSize: [5, 5],
           })
-        }
+        },
+        raw_data: new this.$LocationHisrtoryJson(),
       }
     },
     methods: {
+      /* ファイルのアップロード時に呼び出される関数 */
       async change(e) {
-        this.map.markers = [];
-        this.map.lines = [];
-        let kml = new this.$KML();
+        this.raw_data = new this.$LocationHisrtoryJson();
         const files = e.target.files;
         for (const file of files) {
           const text = await file.text();
-          const obj = JSON.parse(text);
-          for (const element of obj) {
-            const name = '';
-            const begin = new Date(element.startTime);
-            const end = new Date(element.endTime);
-            if (this.isIncludeHtmlTime(begin, end) === false) {
-              continue;
-            }
-            if (element.visit !== undefined) {
-              let location = element.visit.topCandidate.placeLocation.replace('geo:', '').split(',');
-              let latitude = location[0];
-              let longitude = location[1];
-              this.map.markers.push([parseFloat(latitude), parseFloat(longitude)]);
-              kml.addPlace(name, latitude, longitude, begin, end);
-            }
-            else if (element.activity !== undefined) {
-              let lstart = element.activity.start.replace('geo:', '').split(',');
-              let lend = element.activity.end.replace('geo:', '').split(',');
-              let lines = [[lstart[1], lstart[0]], [lend[1], lend[0]]];
-              this.map.lines.push([lstart, lend]);
-              kml.addLines(name, lines, begin, end);
-            }
-            else if (element.timelinePath != undefined) {
-              let lines = [];
-              this.map.lines.push([]);
-              const tail = this.map.lines.length - 1;
-              element.timelinePath.forEach(path => {
-                let location = path.point.replace('geo:', '').split(',');
-                lines.push([location[1], location[0]]);
-                this.map.lines[tail].push([location[0], location[1]]);
-              });
-              kml.addLines(name, lines, begin, end);
-            }
-          }
+          this.raw_data.load(text);
         }
-        console.log(kml.toString());
         this.adjustMap();
       },
       adjustMap() {
-        if (this.map.markers.length == 0) {
-          this.map.center = [0, 0];
+        /* 日付の計算 */
+        const time_diff = new Date('1970-01-01T00:00:00.000Z')
+          - new Date('1970-01-01T00:00:00.000'); // 時差(日本なら+09:00)
+        const begin = new Date(this.html_input.begin) - time_diff;
+        const end = new Date(this.html_input.end) - time_diff
+          + (new Date('1970-01-02T00:00:00.000Z') - 1);
+        /* マーカーの更新 */
+        this.map.markers = [];
+        const visits = this.raw_data.getVisits(begin, end);
+        for (const visit of visits) {
+          this.map.markers.push([
+            visit.point.latitude,
+            visit.point.longitude
+          ]);
+        }
+        /* ラインの更新 */
+        this.map.lines = [];
+        const activities = this.raw_data.getActivities(begin, end);
+        for (const activitiy of activities) {
+          let line = [];
+          for (const point of activitiy.points) {
+            line.push([
+              point.latitude,
+              point.longitude
+            ]);
+          }
+          this.map.lines.push(line);
+        }
+        /* 中心点の更新 */
+        let latitudes = [];
+        let longitudes = [];
+        for (const lat_lng of this.map.markers) {
+          latitudes.push(parseFloat(lat_lng[0]));
+          longitudes.push(parseFloat(lat_lng[1]));
+        };
+        for (const line of this.map.lines) {
+          for (const lat_lng of line) {
+            latitudes.push(parseFloat(lat_lng[0]));
+            longitudes.push(parseFloat(lat_lng[1]));
+          }
+        };
+        if (latitudes.length === 0 || longitudes.length === 0) {
+          this.map.center = DEFINES.TOKYO_STATION;
           return;
         }
-        let north = this.map.markers[0][0], south = this.map.markers[0][0];
-        let east = this.map.markers[0][1], west = this.map.markers[0][1];
-        this.map.markers.forEach(marker => {
-          let latitude = marker[0];
-          let longitude = marker[1];
+        let north = latitudes[0], south = latitudes[0];
+        let east = longitudes[0], west = longitudes[0];
+        for (const latitude of latitudes) {
           north = latitude > north ? latitude : north;
           south = latitude < south ? latitude : south;
+        }
+        for (const longitude of longitudes) {
           east = longitude > east ? longitude : east;
           west = longitude < west ? longitude : west;
-        });
-        this.map.center = [(north+south)/2, (east+west)/2];
-      },
-      /* HTMLで指定した期間に引数で指定した期間が含まれるか否か */
-      isIncludeHtmlTime(begin, end) {
-        const time_diff = new Date('1970-01-01T00:00:00.000Z') - new Date('1970-01-01T00:00:00.000'); // 時差(日本なら+09:00)
-        const html_time = {
-          begin: new Date(this.html_input.begin) - time_diff,
-          end: new Date(this.html_input.end) - time_diff + (new Date('1970-01-02T00:00:00.000Z') - 1),
-        };
-        if (begin < html_time.begin || end > html_time.end) {
-          return false;
         }
-        return true;
+        this.map.center = [(north + south) / 2, (east + west) / 2];
       },
     }
   }
