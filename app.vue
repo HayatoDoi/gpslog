@@ -19,8 +19,8 @@
     </LMap>
   </div>
   <div>
-    <input type="file" accept=".json" multiple @change="change"><br>
-    <input v-model="html_input.begin" type="date"></input>〜<input v-model="html_input.end" type="date"></input>
+    <input type="file" accept=".json" multiple @change="import_data"><br>
+    <input v-model="html_input.begin" type="date" @change="update_map"></input>〜<input v-model="html_input.end" type="date" @change="update_map"></input>
   </div>
 </template>
 <script>
@@ -50,16 +50,16 @@
     },
     methods: {
       /* ファイルのアップロード時に呼び出される関数 */
-      async change(e) {
+      async import_data(e) {
         this.raw_data = new this.$LocationHisrtoryJson();
         const files = e.target.files;
         for (const file of files) {
           const text = await file.text();
           this.raw_data.load(text);
         }
-        this.adjustMap();
+        this.update_map();
       },
-      adjustMap() {
+      update_map() {
         /* 日付の計算 */
         const time_diff = new Date('1970-01-01T00:00:00.000Z')
           - new Date('1970-01-01T00:00:00.000'); // 時差(日本なら+09:00)
