@@ -33,14 +33,35 @@
       </div>
     </div>
   </div>
-  <div class="date">
-    <input type="button" value="<<" @click="time_rewind('-month')">
-    <input type="button" value="<" @click="time_rewind('-day')">
-    <input v-model="html_input.begin" type="date" @change="update_map"></input>
-      〜
-    <input v-model="html_input.end" type="date" @change="update_map"></input>
-    <input type="button" value=">" @click="time_rewind('+day')">
-    <input type="button" value=">>" @click="time_rewind('+month')">
+  <div class="calendar">
+    <UButton color="neutral" variant="subtle"
+     icon="material-symbols:keyboard-double-arrow-left"
+     @click="time_rewind('-month')" />
+    <UButton color="neutral" variant="subtle"
+     icon="material-symbols:chevron-left"
+     @click="time_rewind('-day')" />
+    <UPopover>
+      <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
+        <template v-if="isOneDay()">
+          {{ calendar.start.toString().replaceAll('-', '/') }}
+        </template>
+        <template v-else>
+          {{ calendar.start.toString().replaceAll('-', '/') }}
+          -
+          {{ calendar.end.toString().replaceAll('-', '/') }}
+        </template>
+      </UButton>
+      <template #content>
+        <UCalendar v-model="calendar" class="p-2" range
+         @update:model-value="update_map" />
+      </template>
+    </UPopover>
+    <UButton color="neutral" variant="subtle"
+     icon="material-symbols:chevron-right"
+     @click="time_rewind('+day')" />
+    <UButton color="neutral" variant="subtle"
+     icon="material-symbols:keyboard-double-arrow-right"
+     @click="time_rewind('+month')" />
   </div>
 </template>
 <style>
@@ -125,7 +146,7 @@
     border: 2px dashed #016538;
   }
 
-  .date {
+  .calendar {
     position: absolute;
     text-align: center;
     width: 100%;
@@ -138,11 +159,16 @@
   }
 </style>
 <script>
-  import L from 'leaflet'
+  import L from 'leaflet';
+  import { CalendarDate } from '@internationalized/date';
   const DEFINES = {
     TOKYO_STATION: [35.68114, 139.767061],
     DEFAULT_ZOOM: 6,
-    TODAY: new Date().toISOString().substring(0, 10),
+    TODAY: {
+      YEAR: new Date().getFullYear(),
+      MONTH: new Date().getMonth() + 1,
+      DAY: new Date().getDate(),
+    },
   };
   export default {
     data() {
@@ -150,9 +176,11 @@
         page: {
           modal: 'upload',
         },
-        html_input: {
-          begin: DEFINES.TODAY,
-          end: DEFINES.TODAY,
+        calendar: {
+          start: new CalendarDate(
+            DEFINES.TODAY.YEAR, DEFINES.TODAY.MONTH, DEFINES.TODAY.DAY),
+          end: new CalendarDate(
+            DEFINES.TODAY.YEAR, DEFINES.TODAY.MONTH, DEFINES.TODAY.DAY),
         },
         map: {
           markers: [],
@@ -188,38 +216,46 @@
         this.update_map();
         this.page.modal = '';
       },
+      /* 選択された日付が一日か否か */
+      isOneDay() {
+        return this.calendar.start.compare(this.calendar.end) === 0;
+      },
       /* 日付送り・戻しボタンを押したときに呼び出される関数 */
       time_rewind(type) {
-        let begin = new Date(this.html_input.begin);
-        let end = new Date(this.html_input.end);
         switch (type) {
           case '-month':
-            begin.setMonth(begin.getMonth() - 1);
-            end.setMonth(end.getMonth() - 1);
+            this.calendar.start =
+              this.calendar.start.subtract({months: 1});
+            this.calendar.end =
+              this.calendar.end.subtract({months: 1});
             break;
           case '-day':
-            begin.setDate(begin.getDate() - 1);
-            end.setDate(end.getDate() - 1);
+            this.calendar.start =
+              this.calendar.start.subtract({days: 1});
+            this.calendar.end =
+              this.calendar.end.subtract({days: 1});
             break;
           case '+day':
-            begin.setDate(begin.getDate() + 1);
-            end.setDate(end.getDate() + 1);
+            this.calendar.start =
+              this.calendar.start.add({days: 1});
+            this.calendar.end =
+              this.calendar.end.add({days: 1});
             break;
           case '+month':
-            begin.setMonth(begin.getMonth() + 1);
-            end.setMonth(end.getMonth() + 1);
+            this.calendar.start =
+              this.calendar.start.add({months: 1});
+            this.calendar.end =
+              this.calendar.end.add({months: 1});
             break;
         }
-        this.html_input.begin = begin.toISOString().substring(0, 10);
-        this.html_input.end = end.toISOString().substring(0, 10);
         this.update_map();
       },
       update_map() {
         /* 日付の計算 */
         const time_diff = new Date('1970-01-01T00:00:00.000Z')
           - new Date('1970-01-01T00:00:00.000'); // 時差(日本なら+09:00)
-        const begin = new Date(this.html_input.begin) - time_diff;
-        const end = new Date(this.html_input.end) - time_diff
+        const begin = this.calendar.start.toDate() - time_diff;
+        const end = this.calendar.end.toDate() - time_diff
           + (new Date('1970-01-02T00:00:00.000Z') - 1);
         /* マーカーの更新 */
         this.map.markers = [];
