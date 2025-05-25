@@ -2,7 +2,7 @@
   <div class="map">
     <LMap
       ref="map"
-      :zoom="6"
+      :zoom="map.zoom"
       :center="map.center"
       :use-global-leaflet="true"
     >
@@ -67,6 +67,7 @@
   import L from 'leaflet'
   const DEFINES = {
     TOKYO_STATION: [35.68114, 139.767061],
+    DEFAULT_ZOOM: 6,
     TODAY: new Date().toISOString().substring(0, 10),
   };
   export default {
@@ -86,7 +87,11 @@
           icon: L.icon({
             iconUrl: 'icon.png',
             iconSize: [5, 5],
-          })
+          }),
+          zoom: DEFINES.DEFAULT_ZOOM,
+        },
+        timeoutID: {
+          zoom: -1,
         },
         raw_data: new this.$LocationHisrtoryJson(),
       }
@@ -158,7 +163,7 @@
           }
           this.map.lines.push(line);
         }
-        /* 中心点の更新 */
+        /* 中心点とズームレベルを更新 */
         let latitudes = [];
         let longitudes = [];
         for (const lat_lng of this.map.markers) {
@@ -173,6 +178,7 @@
         };
         if (latitudes.length === 0 || longitudes.length === 0) {
           this.map.center = DEFINES.TOKYO_STATION;
+          this.map.zoom = DEFINES.DEFAULT_ZOOM;
           return;
         }
         let north = latitudes[0], south = latitudes[0];
@@ -186,6 +192,20 @@
           west = longitude < west ? longitude : west;
         }
         this.map.center = [(north + south) / 2, (east + west) / 2];
+        let zoomX = 1;
+        const distanceX = (east - west) * (500 / window.innerWidth);
+        for (zoomX = 1; distanceX < (180 / (2 ** zoomX)); zoomX++);
+        let zoomY = 1;
+        const distanceY = (north - south) * (500 / window.innerHeight);
+        for (zoomY = 1; distanceY < (180 / (2 ** zoomY)); zoomY++);
+        /* 中心点の更新を実行してからすぐにズームレベルを更新すると、
+         * 中心点がずれるため、時間を250msec空けてからズームレベルを更新する */
+        if (this.timeoutID.zoom !== -1) {
+          clearTimeout(this.timeoutID.zoom);
+        }
+        this.timeoutID.zoom = setTimeout((zoom) => {
+          this.map.zoom = zoom;
+        }, 250, zoomX < zoomY ? zoomX : zoomY);
       },
     }
   }
