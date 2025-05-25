@@ -255,11 +255,10 @@
       },
       update_map() {
         /* 日付の計算 */
-        const time_diff = new Date('1970-01-01T00:00:00.000Z')
-          - new Date('1970-01-01T00:00:00.000'); // 時差(日本なら+09:00)
-        const begin = this.calendar.start.toDate() - time_diff;
-        const end = this.calendar.end.toDate() - time_diff
-          + (new Date('1970-01-02T00:00:00.000Z') - 1);
+        const begin = this.calendar.start.toDate();
+        let end = this.calendar.end.toDate();
+        end.setDate(end.getDate() + 1);
+        end.setSeconds(end.getSeconds() - 1);
         /* マーカーの更新 */
         this.map.markers = [];
         const visits = this.raw_data.getVisits(begin, end);
