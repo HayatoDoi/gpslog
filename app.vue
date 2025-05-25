@@ -57,11 +57,14 @@
   }
   .date {
     position: absolute;
+    text-align: center;
+    width: 100%;
     z-index: 100;
     top: 100%;
-    left: 50%;
+    left: 0;
+    right: 0;
     height: 50px;
-    transform: translate(-50%, -110%);
+    transform: translateY(-110%);
   }
 </style>
 <script>
