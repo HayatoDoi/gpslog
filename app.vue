@@ -8,7 +8,10 @@
     >
       <LTileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+        attribution="&amp;copy; <a href=&quot;https://github.com/HayatoDoi/gpslog&quot;>HayatoDoi</a>"
+      >
+      <UIcon name="i-lucide-lightbulb" class="size-5" />
+      </LTileLayer>
       <template v-for="marker in map.markers">
         <LMarker :lat-lng="marker" :icon="map.icon" />
       </template>
