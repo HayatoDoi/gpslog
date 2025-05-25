@@ -9,6 +9,9 @@
   "[typescript]": {
       "editor.tabSize": 2
   },
+  "[vue]": {
+      "editor.tabSize": 2
+  },
   // 自動挿入した空白は削除する
   "editor.trimAutoWhitespace": true,
   // 文字コード
