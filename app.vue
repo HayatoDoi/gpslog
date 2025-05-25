@@ -17,9 +17,21 @@
       </template>
     </LMap>
   </div>
-  <div class="map-lock" v-if="page.mode === 'upload'"></div>
-  <div class="file" v-if="page.mode === 'upload'">
-    <input type="file" accept=".json" multiple @change="import_data">
+  <div class="modal" v-if="this.page.modal === 'upload'">
+    <div class="modal-contents">
+      <div class="modal-header">
+        <p>ファイルのアップロード</p>
+        <UButton class="modal-close" icon="material-symbols:close-rounded"
+         size="lg" color="neutral" variant="outline" @click="this.page.modal = ''"/>
+      </div>
+      <div class="modal-body">
+        <p>Google Mapアプリからエクスポートした location-history.json ファイルをアップロードしてください。</p>
+        <p>location-history.json のエクスポート方法は <a href="">こちら</a>。</p>
+        <UButton class="file-upload-erea" icon="fluent-mdl2:attach"
+        color="neutral" variant="outline" @click="upload">アップロード</UButton>
+        <input id="file-input" type="file" hidden accept=".json" multiple @change="import_data">
+      </div>
+    </div>
   </div>
   <div class="date">
     <input type="button" value="<<" @click="time_rewind('-month')">
@@ -32,34 +44,92 @@
   </div>
 </template>
 <style>
-  body, html, #__nuxt, #__layout, .map, .map-lock, .control {
-    width: 100%;
-    height: 100%;
-    margin: 0;
+  * {
     touch-action: manipulation;
   }
+
+  body,
+  html,
+  #__nuxt,
+  #__layout,
+  .map,
+  .modal {
+    width: 100%;
+    height: 100%;
+  }
+
   .map {
     position: absolute;
     z-index: 50;
   }
-  .map-lock {
-    position: absolute;
-    z-index: 90;
-    background-color: rgba(0, 0, 0, 0.734);
-  }
-  .file {
+
+  .modal {
     position: absolute;
     z-index: 100;
+    background-color: rgba(0, 0, 0, 0.6);
+  }
+
+  .modal .modal-contents {
+    position: absolute;
+    z-index: 110;
+    text-align: center;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     margin: auto;
+    background-color: white;
+    width: 80%;
+    height: 50%;
+    border-radius: 10px;
   }
+
+  .modal .modal-contents .modal-header {
+    /* height: 10%; */
+    padding: 5%;
+    padding-bottom: 2.5%;
+    display: flow-root;
+  }
+
+  .modal .modal-contents .modal-header p {
+    height: 5%;
+    float: left;
+    text-align: left;
+  }
+
+  .modal .modal-contents .modal-header .modal-close {
+    text-align: right;
+    float: right;
+  }
+
+  .modal .modal-contents .modal-body {
+    text-align: left;
+    padding: 5%;
+    padding-top: 0%;
+  }
+
+  .file-upload-erea {
+    text-align: center;
+    width: 80%;
+    padding: 10%;
+    margin: 10%;
+    margin-top: 5%;
+    margin-bottom: 2.5%;
+    height: 15%;
+    border: 2px dashed #00C16A;
+    border-radius: 10px;
+
+  }
+
+  .file-upload-erea:hover {
+    background-color: #b3f5d132;
+    border: 2px dashed #016538;
+  }
+
   .date {
     position: absolute;
     text-align: center;
     width: 100%;
-    z-index: 100;
+    z-index: 90;
     top: 100%;
     left: 0;
     right: 0;
@@ -78,7 +148,7 @@
     data() {
       return {
         page: {
-          mode: 'upload',
+          modal: 'upload',
         },
         html_input: {
           begin: DEFINES.TODAY,
@@ -101,6 +171,12 @@
       }
     },
     methods: {
+      /* アップロードボタンが押されたときに呼び出される関数 */
+      upload() {
+        /* input要素を強制発火させる */
+        const elem = document.getElementById('file-input');
+        elem.click();
+      },
       /* ファイルのアップロード時に呼び出される関数 */
       async import_data(e) {
         this.raw_data = new this.$LocationHisrtoryJson();
@@ -110,7 +186,7 @@
           this.raw_data.load(text);
         }
         this.update_map();
-        this.page.mode = 'view';
+        this.page.modal = '';
       },
       /* 日付送り・戻しボタンを押したときに呼び出される関数 */
       time_rewind(type) {
