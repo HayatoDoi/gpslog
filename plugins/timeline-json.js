@@ -1,7 +1,10 @@
-class LocationHisrtoryJson {
-  __visits = [];/* 訪問場所 */
-  __activities = []; /* 移動履歴 */
+/*
+ * Googleマップアプリからエクスポートできるlocation-hisotory.jsonを管理する
+ */
 
+import { TimeLine } from './timeline';
+
+class TimeLineJson extends TimeLine {
   /* ファイルを読み込む */
   load(text) {
     const obj = JSON.parse(text);
@@ -14,7 +17,7 @@ class LocationHisrtoryJson {
       if (semantic.visit !== undefined) {
         const place_location = semantic.visit.topCandidate.placeLocation;
         const lat_lng = this.__parseLatLng(place_location);
-        this.__addVisit(begin, end, lat_lng[0], lat_lng[1]);
+        this.addVisit(begin, end, lat_lng[0], lat_lng[1]);
       }
       /* 移動履歴 */
       else if (semantic.timelinePath != undefined) {
@@ -27,7 +30,7 @@ class LocationHisrtoryJson {
             longitude: lat_lng[1],
           });
         }
-        this.__addActivity(begin, end, points);
+        this.addActivity(begin, end, points);
       }
       /* 移動履歴(old style) */
       else if (semantic.activity !== undefined) {
@@ -40,7 +43,7 @@ class LocationHisrtoryJson {
             longitude: lat_lng[1],
           });
         }
-        this.__addActivity(begin, end, points);
+        this.addActivity(begin, end, points);
       }
     }
   };
@@ -80,31 +83,6 @@ class LocationHisrtoryJson {
     return lat_lng;
   };
 
-  /* 訪問場所を追加する */
-  __addVisit(begin, end, latitude, longitude) {
-    this.__visits.push({
-      time: {
-        begin: begin,
-        end: end,
-      },
-      point: {
-        latitude: latitude,
-        longitude: longitude,
-      },
-    });
-  };
-
-  /* 移動履歴を追加する */
-  __addActivity(begin, end, points) {
-    this.__activities.push({
-      time: {
-        begin: begin,
-        end: end,
-      },
-      points: points,
-    });
-  };
-
   /* 値を取得するときのフィルター */
   __get_filter(begin, end, arr) {
     let rtn = [];
@@ -116,22 +94,12 @@ class LocationHisrtoryJson {
     }
     return rtn;
   };
-
-  /* 訪問場所を取得する */
-  getVisits(begin, end) {
-    return this.__get_filter(begin, end, this.__visits);
-  };
-
-  /* 移動履歴を取得する */
-  getActivities(begin, end) {
-    return this.__get_filter(begin, end, this.__activities);
-  };
 }
 
 export default defineNuxtPlugin((_nuxtApp) => {
   return {
     provide: {
-      LocationHisrtoryJson,
+      TimeLineJson,
     }
   }
 });

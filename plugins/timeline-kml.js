@@ -1,4 +1,8 @@
-class KML {
+/*
+ * Google My Mapなどでインポートできるkmlファイルを管理する
+ */
+
+class TimeLineKml {
   __header = '<?xml version="1.0" encoding="UTF-8"?>';
   __kml;
   __upper_tag = [
@@ -74,7 +78,7 @@ class KML {
 export default defineNuxtPlugin((_nuxtApp) => {
   return {
     provide: {
-      KML,
+      TimeLineKml,
     }
   }
 });

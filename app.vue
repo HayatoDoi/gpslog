@@ -198,7 +198,7 @@
         timeoutID: {
           zoom: -1,
         },
-        raw_data: new this.$LocationHisrtoryJson(),
+        raw_data: new this.$TimeLineJson(),
       }
     },
     methods: {
@@ -210,7 +210,7 @@
       },
       /* ファイルのアップロード時に呼び出される関数 */
       async import_data(e) {
-        this.raw_data = new this.$LocationHisrtoryJson();
+        this.raw_data = new this.$TimeLineJson();
         const files = e.target.files;
         for (const file of files) {
           const text = await file.text();
