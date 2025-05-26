@@ -243,6 +243,12 @@
           const text = await file.text();
           this.raw_data.load(text);
         }
+        const current_date = this.raw_data.getMaxDate();
+        const year = current_date.getFullYear();
+        const month = current_date.getMonth() + 1;
+        const day = current_date.getDate();
+        this.calendar.end = this.calendar.start =
+          new CalendarDate(year, month, day);
         this.update_map();
         this.page.modal = '';
       },

@@ -6,9 +6,22 @@ import { Geodesic } from 'geographiclib-geodesic';
 export class TimeLine {
   __visits = []; /* 訪問場所 */
   __activities = []; /* 移動履歴 */
+  __min_time = null;
+  __max_time = null;
+
+  /* タイムライン日時の最大・最小を更新する */
+  __updateMinMaxTime(begin, end) {
+    if (this.__min_time === null || begin < this.__min_time) {
+      this.__min_time = begin;
+    }
+    if (this.__max_time === null || end > this.__max_time) {
+      this.__max_time = end;
+    }
+  };
 
   /* 訪問場所を追加する */
   addVisit(begin, end, latitude, longitude) {
+    this.__updateMinMaxTime(begin, end);
     this.__visits.push({
       time: {
         begin: begin,
@@ -23,6 +36,7 @@ export class TimeLine {
 
   /* 移動履歴を追加する */
   addActivity(begin, end, points) {
+    this.__updateMinMaxTime(begin, end);
     this.__activities.push({
       time: {
         begin: begin,
@@ -52,6 +66,16 @@ export class TimeLine {
   /* 移動履歴を取得する */
   getActivities(begin, end) {
     return this.__get_filter(begin, end, this.__activities);
+  };
+
+  /* 最小日時を取得する */
+  getMinDate() {
+    return this.__min_time;
+  };
+
+  /* 最大日時を取得する */
+  getMaxDate() {
+    return this.__max_time;
   };
 
   /* 2点間の距離(km)を計算する */
