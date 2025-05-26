@@ -28,8 +28,8 @@
          size="lg" color="neutral" variant="outline" @click="this.page.modal = ''"/>
       </div>
       <div class="modal-body">
-        <p>Google Mapアプリからエクスポートした location-history.json ファイルをアップロードしてください。</p>
-        <p>location-history.json のエクスポート方法は <a href="">こちら</a>。</p>
+        <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
+        <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
         <UButton class="file-upload-erea" icon="fluent-mdl2:attach"
         color="neutral" variant="outline" @click="upload">アップロード</UButton>
         <input id="file-input" type="file" hidden accept=".json" multiple @change="import_data">
