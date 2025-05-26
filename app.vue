@@ -36,7 +36,8 @@
       </div>
     </div>
   </div>
-  <div class="calendar">
+  <div class="bottom-menu">
+    <p>{{ this.distance }}km</p>
     <UButton color="neutral" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-left"
      @click="time_rewind('-month')" />
@@ -149,7 +150,7 @@
     border: 2px dashed #016538;
   }
 
-  .calendar {
+  .bottom-menu {
     position: absolute;
     text-align: center;
     width: 100%;
@@ -157,7 +158,7 @@
     top: 100%;
     left: 0;
     right: 0;
-    height: 50px;
+    height: 80px;
     transform: translateY(-110%);
   }
 </style>
@@ -195,6 +196,7 @@
           }),
           zoom: DEFINES.DEFAULT_ZOOM,
         },
+        distance: 0.0,
         timeoutID: {
           zoom: -1,
         },
@@ -259,6 +261,8 @@
         let end = this.calendar.end.toDate();
         end.setDate(end.getDate() + 1);
         end.setSeconds(end.getSeconds() - 1);
+        /* 距離の更新 */
+        this.distance = this.raw_data.getDistance(begin, end);
         /* マーカーの更新 */
         this.map.markers = [];
         const visits = this.raw_data.getVisits(begin, end);
