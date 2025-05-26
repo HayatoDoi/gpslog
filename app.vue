@@ -57,7 +57,13 @@
       </UButton>
       <template #content>
         <UCalendar v-model="calendar" class="p-2" range
-         @update:model-value="update_map" />
+         @update:model-value="update_map">
+         <template #day="{ day }">
+          <UChip :show="!!getCalenderChip(day)" color="success" :size="getCalenderChip(day)">
+            {{ day.day }}
+          </UChip>
+        </template>
+         </UCalendar>
       </template>
     </UPopover>
     <UButton color="neutral" variant="subtle"
@@ -204,6 +210,24 @@
       }
     },
     methods: {
+      /* カレンダー上に表示するチップサイズを計算する関数 */
+      getCalenderChip(calendar_date) {
+        const begin = calendar_date.toDate();
+        let end = calendar_date.toDate();
+        end.setDate(end.getDate() + 1);
+        end.setSeconds(end.getSeconds() - 1);
+        const distance = this.raw_data.getDistance(begin, end);
+        if (distance < 1.0) {
+          return undefined;
+        }
+        if (distance < 10.0) {
+          return '3xs';
+        }
+        if (distance < 50.0) {
+          return '2xs';
+        }
+        return 'xs';
+      },
       /* アップロードボタンが押されたときに呼び出される関数 */
       upload() {
         /* input要素を強制発火させる */
