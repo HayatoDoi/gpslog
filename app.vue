@@ -38,14 +38,14 @@
   </div>
   <div class="bottom-menu">
     <p>{{ this.distance }}km</p>
-    <UButton color="neutral" variant="subtle"
+    <UButton color="neutral" size="xl" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-left"
      @click="time_rewind('-month')" />
-    <UButton color="neutral" variant="subtle"
+    <UButton color="neutral" size="xl" variant="subtle"
      icon="material-symbols:chevron-left"
      @click="time_rewind('-day')" />
     <UPopover>
-      <UButton color="neutral" variant="subtle" icon="i-lucide-calendar">
+      <UButton color="neutral" size="xl" variant="subtle" icon="i-lucide-calendar">
         <template v-if="isOneDay()">
           {{ calendar.start.toString().replaceAll('-', '/') }}
         </template>
@@ -56,7 +56,7 @@
         </template>
       </UButton>
       <template #content>
-        <UCalendar v-model="calendar" class="p-2" range
+        <UCalendar size="xl" v-model="calendar" class="p-2" range
          @update:model-value="update_map">
          <!-- 動作がもっさりするため無効化 -->
           <!-- <template #day="{ day }">
@@ -67,10 +67,10 @@
          </UCalendar>
       </template>
     </UPopover>
-    <UButton color="neutral" variant="subtle"
+    <UButton color="neutral" size="xl" variant="subtle"
      icon="material-symbols:chevron-right"
      @click="time_rewind('+day')" />
-    <UButton color="neutral" variant="subtle"
+    <UButton color="neutral" size="xl" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-right"
      @click="time_rewind('+month')" />
   </div>
