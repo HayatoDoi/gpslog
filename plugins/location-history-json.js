@@ -13,7 +13,7 @@ class LocationHisrtoryJson {
       /* 訪問場所 */
       if (semantic.visit !== undefined) {
         const place_location = semantic.visit.topCandidate.placeLocation;
-        let lat_lng = this.__parsePlaceLocation(place_location);
+        const lat_lng = this.__parseLatLng(place_location);
         this.__addVisit(begin, end, lat_lng[0], lat_lng[1]);
       }
       /* 移動履歴 */
@@ -21,7 +21,7 @@ class LocationHisrtoryJson {
         let points = [];
         for (const path of semantic.timelinePath) {
           const point = path.point;
-          let lat_lng = this.__parseLatLng(point);
+          const lat_lng = this.__parseLatLng(point);
           points.push({
             latitude: lat_lng[0],
             longitude: lat_lng[1],
@@ -34,7 +34,7 @@ class LocationHisrtoryJson {
         let points = [];
         const keywords = ['start', 'end'];
         for (const keyword of keywords) {
-          let lat_lng = this.__parsePlaceLocation(semantic.activity[keyword]);
+          const lat_lng = this.__parseLatLng(semantic.activity[keyword]);
           points.push({
             latitude: lat_lng[0],
             longitude: lat_lng[1],
@@ -59,23 +59,16 @@ class LocationHisrtoryJson {
     return semantics;
   };
 
-  /* 訪問場所を解析する */
-  __parsePlaceLocation(obj) {
-    let lat_lng = [0, 0];
-    /* iPhone用のデータ書式 */
-    if (typeof obj === "string") {
-      lat_lng = this.__parseLatLng(obj);
-    }
-    /* Android用のデータ書式 */
-    else {
-      lat_lng = this.__parseLatLng(obj['latLng']);
-    }
-    return lat_lng;
-  };
-
   /* 緯度・経度を解析する */
-  __parseLatLng(text) {
+  __parseLatLng(obj) {
     let lat_lng = [0, 0];
+    let text;
+    if (typeof obj === "string") {
+      text = obj;
+    }
+    else {
+      text = obj['latLng'];
+    }
     /* iPhone用のデータ書式 */
     if (text.startsWith('geo:')) {
       lat_lng = text.replace('geo:', '').split(',');
