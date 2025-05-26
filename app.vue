@@ -50,14 +50,14 @@
   </div>
   <div class="bottom-menu">
     <p>{{ this.distance }}km</p>
-    <UButton color="neutral" size="xl" variant="subtle"
+    <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-left"
      @click="time_rewind('-month')" />
-    <UButton color="neutral" size="xl" variant="subtle"
+    <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:chevron-left"
      @click="time_rewind('-day')" />
     <UPopover>
-      <UButton color="neutral" size="xl" variant="subtle" icon="i-lucide-calendar">
+      <UButton color="neutral" size="lg" variant="subtle" icon="i-lucide-calendar">
         <template v-if="isOneDay()">
           {{ calendar.start.toString().replaceAll('-', '/') }}
         </template>
@@ -79,10 +79,10 @@
          </UCalendar>
       </template>
     </UPopover>
-    <UButton color="neutral" size="xl" variant="subtle"
+    <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:chevron-right"
      @click="time_rewind('+day')" />
-    <UButton color="neutral" size="xl" variant="subtle"
+    <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-right"
      @click="time_rewind('+month')" />
   </div>
