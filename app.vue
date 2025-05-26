@@ -58,11 +58,12 @@
       <template #content>
         <UCalendar v-model="calendar" class="p-2" range
          @update:model-value="update_map">
-         <template #day="{ day }">
-          <UChip :show="!!getCalenderChip(day)" color="success" :size="getCalenderChip(day)">
+         <!-- 動作がもっさりするため無効化 -->
+          <!-- <template #day="{ day }">
+            <UChip :show="!!getCalenderChip(day)" color="success" :size="getCalenderChip(day)">
             {{ day.day }}
-          </UChip>
-        </template>
+            </UChip>
+          </template> -->
          </UCalendar>
       </template>
     </UPopover>
