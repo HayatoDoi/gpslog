@@ -5,64 +5,111 @@ class LocationHisrtoryJson {
   /* ファイルを読み込む */
   load(text) {
     const obj = JSON.parse(text);
-    for (const element of obj) {
-      const begin = new Date(element.startTime);
-      const end = new Date(element.endTime);
+    const semantics = this.__parseSemantics(obj);
+    for (const semantic of semantics) {
+      /* 開始・終了時間 */
+      const begin = new Date(semantic.startTime);
+      const end = new Date(semantic.endTime);
       /* 訪問場所 */
-      if (element.visit !== undefined) {
-        const lat_lng = element.visit.topCandidate.placeLocation.replace('geo:', '').split(',');
-        this.__visits.push({
-          time: {
-            begin: begin,
-            end: end,
-          },
-          point: {
-            latitude: lat_lng[0],
-            longitude: lat_lng[1],
-          },
-        });
+      if (semantic.visit !== undefined) {
+        const place_location = semantic.visit.topCandidate.placeLocation;
+        let lat_lng = this.__parsePlaceLocation(place_location);
+        this.__addVisit(begin, end, lat_lng[0], lat_lng[1]);
       }
       /* 移動履歴 */
-      else if (element.timelinePath != undefined) {
-        let activity = {
-          time: {
-            begin: begin,
-            end: end,
-          },
-          points: [],
-        };
-        for (const path of element.timelinePath) {
-          let lat_lng = path.point.replace('geo:', '').split(',');
-          activity.points.push({
+      else if (semantic.timelinePath != undefined) {
+        let points = [];
+        for (const path of semantic.timelinePath) {
+          const point = path.point;
+          let lat_lng = this.__parseLatLng(point);
+          points.push({
             latitude: lat_lng[0],
             longitude: lat_lng[1],
           });
         }
-        this.__activities.push(activity);
+        this.__addActivity(begin, end, points);
       }
       /* 移動履歴(old style) */
-      else if (element.activity !== undefined) {
-        let activity = {
-          time: {
-            begin: begin,
-            end: end,
-          },
-          points: [],
-        };
-        let lat_lng;
-        lat_lng = element.activity.start.replace('geo:', '').split(',');
-        activity.points.push({
+      else if (semantic.activity !== undefined) {
+        let points = [];
+        const keywords = ['start', 'end'];
+        for (const keyword of keywords) {
+          let lat_lng = this.__parsePlaceLocation(semantic.activity[keyword]);
+          points.push({
             latitude: lat_lng[0],
             longitude: lat_lng[1],
-        });
-        lat_lng = element.activity.end.replace('geo:', '').split(',');
-        activity.points.push({
-            latitude: lat_lng[0],
-            longitude: lat_lng[1],
-        });
-        this.__activities.push(activity);
+          });
+        }
+        this.__addActivity(begin, end, points);
       }
     }
+  };
+
+  /* 移動履歴を解析する */
+  __parseSemantics(obj) {
+    let semantics;
+    /* iPhone用のデータ書式 */
+    if (obj['semanticSegments'] === undefined) {
+      semantics = obj;
+    }
+    /* Android用のデータ書式 */
+    else {
+      semantics = obj['semanticSegments'];
+    }
+    return semantics;
+  };
+
+  /* 訪問場所を解析する */
+  __parsePlaceLocation(obj) {
+    let lat_lng = [0, 0];
+    /* iPhone用のデータ書式 */
+    if (typeof obj === "string") {
+      lat_lng = this.__parseLatLng(obj);
+    }
+    /* Android用のデータ書式 */
+    else {
+      lat_lng = this.__parseLatLng(obj['latLng']);
+    }
+    return lat_lng;
+  };
+
+  /* 緯度・経度を解析する */
+  __parseLatLng(text) {
+    let lat_lng = [0, 0];
+    /* iPhone用のデータ書式 */
+    if (text.startsWith('geo:')) {
+      lat_lng = text.replace('geo:', '').split(',');
+    }
+    /* Android用のデータ書式 */
+    else {
+      lat_lng = text.replaceAll('°', '').split(',');
+    }
+    return lat_lng;
+  };
+
+  /* 訪問場所を追加する */
+  __addVisit(begin, end, latitude, longitude) {
+    this.__visits.push({
+      time: {
+        begin: begin,
+        end: end,
+      },
+      point: {
+        latitude: latitude,
+        longitude: longitude,
+      },
+    });
+  };
+
+  /* 移動履歴を追加する */
+  __addActivity(begin, end, points) {
+    this.__activities.push({
+      time: {
+        begin: begin,
+        end: end,
+      },
+      points: points,
+    });
   };
 
   /* 値を取得するときのフィルター */
