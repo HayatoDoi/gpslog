@@ -2,6 +2,7 @@
   <div class="map">
     <LMap
       ref="map"
+      :options="{ zoomControl: false }"
       :zoom="map.zoom"
       :center="map.center"
       :use-global-leaflet="true"
@@ -34,6 +35,17 @@
         color="neutral" variant="outline" @click="upload">アップロード</UButton>
         <input id="file-input" type="file" hidden accept=".json" multiple @change="import_data">
       </div>
+    </div>
+  </div>
+  <div class="left-menu">
+    <div class="zoom-bottom">
+      <UButton color="neutral" size="xl" variant="subtle"
+      icon="material-symbols:add"
+      @click="map.zoom++" />
+      <br>
+      <UButton color="neutral" size="xl" variant="subtle"
+      icon="material-symbols:remove"
+      @click="map.zoom--" />
     </div>
   </div>
   <div class="bottom-menu">
@@ -155,6 +167,15 @@
   .file-upload-erea:hover {
     background-color: #b3f5d132;
     border: 2px dashed #016538;
+  }
+
+  .left-menu {
+    position: absolute;
+    z-index: 90;
+    left: 0;
+    right: 0;
+    margin: 15px;
+    margin-top: 30px;
   }
 
   .bottom-menu {
