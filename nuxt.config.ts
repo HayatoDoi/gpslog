@@ -9,4 +9,7 @@ export default defineNuxtConfig({
     '@nuxtjs/leaflet',
   ],
   css: ['~/assets/css/main.css'],
+  ui: {
+    colorMode: false,
+  },
 })
