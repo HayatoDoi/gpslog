@@ -129,13 +129,13 @@
 
   .modal .modal-contents .modal-header {
     /* height: 10%; */
-    padding: 5%;
-    padding-bottom: 2.5%;
+    padding-top: 40px;
+    padding-left: 5%;
+    padding-right: 5%;
     display: flow-root;
   }
 
   .modal .modal-contents .modal-header p {
-    height: 5%;
     float: left;
     text-align: left;
   }
@@ -147,18 +147,16 @@
 
   .modal .modal-contents .modal-body {
     text-align: left;
-    padding: 5%;
-    padding-top: 0%;
+    padding-top: 20px;
+    padding-left: 5%;
+    padding-right: 5%;
   }
 
   .file-upload-erea {
     text-align: center;
-    width: 80%;
-    padding: 10%;
-    margin: 10%;
-    margin-top: 5%;
-    margin-bottom: 2.5%;
-    height: 15%;
+    width: 100%;
+    margin-top: 10px;
+    height: 100px;
     border: 2px dashed #00C16A;
     border-radius: 10px;
 
