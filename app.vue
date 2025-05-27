@@ -70,12 +70,11 @@
       <template #content>
         <UCalendar size="xl" v-model="calendar" class="p-2" range
          @update:model-value="update_map">
-         <!-- 動作がもっさりするため無効化 -->
-          <!-- <template #day="{ day }">
+          <template #day="{ day }">
             <UChip :show="!!getCalenderChip(day)" color="success" :size="getCalenderChip(day)">
             {{ day.day }}
             </UChip>
-          </template> -->
+          </template>
          </UCalendar>
       </template>
     </UPopover>
