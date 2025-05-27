@@ -6,61 +6,50 @@ import { Geodesic } from 'geographiclib-geodesic';
 class DataList {
   __list = {};
 
+  /* リスト用のインデックスを返す */
+  __getListIndex(date) {
+    const y = String(date.getFullYear());
+    const m = String(date.getMonth() + 1);
+    const d = String(date.getDate());
+    return [y, m, d];
+  };
+
   /* リストに値を追加する */
-  push(begin, end, data) {
-    const year = String(begin.getFullYear());
-    const month = String(begin.getMonth() + 1);
-    const date = String(begin.getDate());
-    if (this.__list[year] === undefined) {
-      this.__list[year] = {};
+  push(begin, end, value) {
+    const [y, m, d] = this.__getListIndex(begin);
+    if (this.__list[y] === undefined) {
+      this.__list[y] = {};
     }
-    if (this.__list[year][month] === undefined) {
-      this.__list[year][month] = {};
+    if (this.__list[y][m] === undefined) {
+      this.__list[y][m] = {};
     }
-    if (this.__list[year][month][date] === undefined) {
-      this.__list[year][month][date] = [];
+    if (this.__list[y][m][d] === undefined) {
+      this.__list[y][m][d] = [];
     }
-    data['time'] = {
+    value['time'] = {
       begin: begin,
       end: end,
     };
-    this.__list[year][month][date].push(data);
+    this.__list[y][m][d].push(value);
   };
 
   /* リストから値を取り出す */
   getData(begin, end) {
     let rtn = [];
     const b_year = begin.getFullYear();
-    const b_month = begin.getMonth() + 1;
+    const b_month = begin.getMonth();
     const b_date = begin.getDate();
-    const e_year = end.getFullYear();
-    const e_month = end.getMonth() + 1;
-    const e_date = end.getDate();
-    for (let year = b_year; year <= e_year; year++) {
-      if (this.__list[String(year)]
-          === undefined) {
+    for (let i = new Date(b_year, b_month, b_date); i < end;
+         i.setDate(i.getDate() + 1 )) {
+      const [y, m, d] = this.__getListIndex(i);
+      if (this.__list?.[y]?.[m]?.[d] === undefined) {
         continue;
       }
-      for (let month = b_month; month <= e_month; month++) {
-        if (this.__list[String(year)][String(month)]
-            === undefined) {
+      for (const value of this.__list[y][m][d]) {
+        if (value.time.begin < begin || value.time.end > end) {
           continue;
         }
-        for (let date = b_date; date <= e_date; date++) {
-          if (this.__list[String(year)][String(month)][String(date)]
-              === undefined) {
-            continue;
-          }
-          let values = 
-            this.__list[String(year)][String(month)][String(date)];
-          for (let i = 0; i < values.length; i++) {
-            const value = values[i];
-            if (value.time.begin < begin || value.time.end > end) {
-              continue;
-            }
-            rtn.push(value);
-          }
-        }
+        rtn.push(value);
       }
     }
     return rtn;
