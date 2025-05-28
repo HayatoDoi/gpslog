@@ -1,4 +1,5 @@
 <template>
+  <input id="file-input" type="file" hidden accept=".json" multiple @change="import_data">
   <div class="map">
     <LMap
       ref="map"
@@ -21,22 +22,14 @@
       </template>
     </LMap>
   </div>
-  <div class="modal" v-if="this.page.modal === 'upload'">
-    <div class="modal-contents">
-      <div class="modal-header">
-        <p>ファイルのアップロード</p>
-        <UButton class="modal-close" icon="material-symbols:close-rounded"
-         size="lg" color="neutral" variant="outline" @click="this.page.modal = ''"/>
-      </div>
-      <div class="modal-body">
-        <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
-        <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
-        <UButton class="file-upload-erea" icon="fluent-mdl2:attach"
+  <UModal v-model:open="page.modal" title="ファイルのアップロード">
+    <template #body>
+      <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
+      <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
+      <UButton class="file-upload-erea" icon="fluent-mdl2:attach"
         color="neutral" variant="outline" @click="upload">アップロード</UButton>
-        <input id="file-input" type="file" hidden accept=".json" multiple @change="import_data">
-      </div>
-    </div>
-  </div>
+    </template>
+  </UModal>
   <div class="left-menu">
     <div class="zoom-bottom">
       <UButton color="neutral" size="xl" variant="subtle"
@@ -95,8 +88,7 @@
   html,
   #__nuxt,
   #__layout,
-  .map,
-  .modal {
+  .map {
     width: 100%;
     height: 100%;
   }
@@ -106,55 +98,10 @@
     z-index: 50;
   }
 
-  .modal {
-    position: absolute;
-    z-index: 100;
-    background-color: rgba(0, 0, 0, 0.6);
-  }
-
-  .modal .modal-contents {
-    position: absolute;
-    z-index: 110;
-    text-align: center;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: auto;
-    background-color: white;
-    width: 80%;
-    height: 50%;
-    border-radius: 10px;
-  }
-
-  .modal .modal-contents .modal-header {
-    /* height: 10%; */
-    padding-top: 40px;
-    padding-left: 5%;
-    padding-right: 5%;
-    display: flow-root;
-  }
-
-  .modal .modal-contents .modal-header p {
-    float: left;
-    text-align: left;
-  }
-
-  .modal .modal-contents .modal-header .modal-close {
-    text-align: right;
-    float: right;
-  }
-
-  .modal .modal-contents .modal-body {
-    text-align: left;
-    padding-top: 20px;
-    padding-left: 5%;
-    padding-right: 5%;
-  }
-
   .file-upload-erea {
     text-align: center;
     width: 100%;
-    margin-top: 10px;
+    margin-top: 30px;
     height: 100px;
     border: 2px dashed #00C16A;
     border-radius: 10px;
@@ -203,7 +150,7 @@
     data() {
       return {
         page: {
-          modal: 'upload',
+          modal: true,
         },
         calendar: {
           start: new CalendarDate(
@@ -268,7 +215,7 @@
         this.calendar.end = this.calendar.start =
           new CalendarDate(year, month, day);
         this.update_map();
-        this.page.modal = '';
+        this.page.modal = false;
       },
       /* 選択された日付が一日か否か */
       isOneDay() {
