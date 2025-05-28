@@ -14,6 +14,9 @@
       >
       </LTileLayer>
       <LControl position="bottomright">
+        <UButton color="neutral" size="xl" variant="subtle"
+         icon="material-symbols:attach-file"
+         @click="page.modal = true" />
         <div class="zoom-menu">
           <UButton color="neutral" size="xl" variant="subtle"
           icon="material-symbols:add"
@@ -36,7 +39,7 @@
     <template #body>
       <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
       <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
-      <UButton class="file-upload-erea" icon="fluent-mdl2:attach"
+      <UButton class="file-upload-erea" icon="material-symbols:attach-file"
        color="neutral" variant="outline" @click="upload">アップロード</UButton>
     </template>
   </UModal>
@@ -210,6 +213,7 @@
         this.calendar.end = this.calendar.start =
           new CalendarDate(year, month, day);
         this.update_map();
+        this.page = {};
       },
       /* 選択された日付が一日か否か */
       isOneDay() {
