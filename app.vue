@@ -53,7 +53,7 @@
      icon="material-symbols:chevron-left"
      @click="time_rewind('-day')" title="前日に戻る" />
     <UPopover>
-      <UButton color="neutral" size="lg" variant="subtle" icon="i-lucide-calendar" title="日付を選択" >
+      <UButton color="neutral" size="lg" variant="subtle" icon="material-symbols:calendar-month" title="日付を選択" >
         <template v-if="isOneDay()">
           {{ calendar.start.toString().replaceAll('-', '/') }}
         </template>
