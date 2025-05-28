@@ -12,8 +12,18 @@
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution="&amp;copy; <a href=&quot;https://github.com/HayatoDoi/gpslog&quot;>HayatoDoi</a>"
       >
-      <UIcon name="i-lucide-lightbulb" class="size-5" />
       </LTileLayer>
+      <LControl position="bottomright">
+        <div class="zoom-menu">
+          <UButton color="neutral" size="xl" variant="subtle"
+          icon="material-symbols:add"
+          @click="map.zoom++" />
+          <br>
+          <UButton color="neutral" size="xl" variant="subtle"
+          icon="material-symbols:remove"
+          @click="map.zoom--" />
+        </div>
+      </LControl>
       <template v-for="marker in map.markers">
         <LMarker :lat-lng="marker" :icon="map.icon" />
       </template>
@@ -27,20 +37,9 @@
       <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
       <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
       <UButton class="file-upload-erea" icon="fluent-mdl2:attach"
-        color="neutral" variant="outline" @click="upload">アップロード</UButton>
+       color="neutral" variant="outline" @click="upload">アップロード</UButton>
     </template>
   </UModal>
-  <div class="left-menu">
-    <div class="zoom-bottom">
-      <UButton color="neutral" size="xl" variant="subtle"
-      icon="material-symbols:add"
-      @click="map.zoom++" />
-      <br>
-      <UButton color="neutral" size="xl" variant="subtle"
-      icon="material-symbols:remove"
-      @click="map.zoom--" />
-    </div>
-  </div>
   <div class="bottom-menu">
     <p>{{ this.distance }}km</p>
     <UButton color="neutral" size="lg" variant="subtle"
@@ -68,7 +67,7 @@
             {{ day.day }}
             </UChip>
           </template>
-         </UCalendar>
+        </UCalendar>
       </template>
     </UPopover>
     <UButton color="neutral" size="lg" variant="subtle"
@@ -113,13 +112,9 @@
     border: 2px dashed #016538;
   }
 
-  .left-menu {
-    position: absolute;
-    z-index: 90;
-    left: 0;
-    right: 0;
-    margin: 15px;
-    margin-top: 30px;
+  .zoom-menu {
+    margin-top: 40px;
+    margin-bottom: 80px;
   }
 
   .bottom-menu {
@@ -215,7 +210,6 @@
         this.calendar.end = this.calendar.start =
           new CalendarDate(year, month, day);
         this.update_map();
-        this.page.modal = false;
       },
       /* 選択された日付が一日か否か */
       isOneDay() {
