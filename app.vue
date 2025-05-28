@@ -16,7 +16,7 @@
       <LControl position="bottomright">
         <UButton color="neutral" size="xl" variant="subtle"
          icon="material-symbols:attach-file-add"
-         @click="page.modal = true" title="ファイルのアップロード" />
+         @click="modal.file_upload = true" title="ファイルのアップロード" />
         <div class="zoom-menu">
           <UButton color="neutral" size="xl" variant="subtle"
           icon="material-symbols:add"
@@ -35,12 +35,13 @@
       </template>
     </LMap>
   </div>
-  <UModal v-model:open="page.modal" title="ファイルのアップロード">
+  <UModal v-model:open="modal.file_upload" title="ファイルのアップロード">
     <template #body>
       <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
       <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
-      <UButton class="file-upload-erea" icon="material-symbols:attach-file-add"
+      <UButton :loading="modal.file_loading" class="file-upload-erea" icon="material-symbols:attach-file-add"
        color="neutral" variant="outline" @click="upload">アップロード</UButton>
+      <p style="color:red"> {{ modal.file_error }}</p>
     </template>
   </UModal>
   <div class="bottom-menu">
@@ -147,8 +148,10 @@
   export default {
     data() {
       return {
-        page: {
-          modal: true,
+        modal: {
+          file_upload: true,
+          file_loading: false,
+          file_error: '',
         },
         calendar: {
           start: new CalendarDate(
@@ -200,20 +203,28 @@
       },
       /* ファイルのアップロード時に呼び出される関数 */
       async import_data(e) {
-        this.raw_data = new this.$TimeLineJson();
-        const files = e.target.files;
-        for (const file of files) {
-          const text = await file.text();
-          this.raw_data.load(text);
+        this.modal.file_loading = true;
+        try {
+          this.raw_data = new this.$TimeLineJson();
+          const files = e.target.files;
+          for (const file of files) {
+            const text = await file.text();
+            this.raw_data.load(text);
+          }
+          const current_date = this.raw_data.getMaxDate();
+          const year = current_date.getFullYear();
+          const month = current_date.getMonth() + 1;
+          const day = current_date.getDate();
+          this.calendar.end = this.calendar.start =
+            new CalendarDate(year, month, day);
+          this.update_map();
         }
-        const current_date = this.raw_data.getMaxDate();
-        const year = current_date.getFullYear();
-        const month = current_date.getMonth() + 1;
-        const day = current_date.getDate();
-        this.calendar.end = this.calendar.start =
-          new CalendarDate(year, month, day);
-        this.update_map();
-        this.page = {};
+        catch (error) {
+          this.modal.file_error = 'ファイルの読み込みに失敗しました';
+          this.modal.file_loading = false;
+          return;
+        }
+        this.modal = {};
       },
       /* 選択された日付が一日か否か */
       isOneDay() {
