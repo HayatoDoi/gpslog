@@ -15,7 +15,7 @@
       </LTileLayer>
       <LControl position="bottomright">
         <UButton color="neutral" size="xl" variant="subtle"
-         icon="material-symbols:attach-file"
+         icon="material-symbols:attach-file-add"
          @click="page.modal = true" />
         <div class="zoom-menu">
           <UButton color="neutral" size="xl" variant="subtle"
@@ -39,7 +39,7 @@
     <template #body>
       <p>iPhoneのGoogle Mapアプリ、または、Androidの設定アプリからダウンロードしたjsonファイルをアップロードしてください。</p>
       <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
-      <UButton class="file-upload-erea" icon="material-symbols:attach-file"
+      <UButton class="file-upload-erea" icon="material-symbols:attach-file-add"
        color="neutral" variant="outline" @click="upload">アップロード</UButton>
     </template>
   </UModal>
