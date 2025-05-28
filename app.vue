@@ -16,15 +16,15 @@
       <LControl position="bottomright">
         <UButton color="neutral" size="xl" variant="subtle"
          icon="material-symbols:attach-file-add"
-         @click="page.modal = true" />
+         @click="page.modal = true" title="ファイルのアップロード" />
         <div class="zoom-menu">
           <UButton color="neutral" size="xl" variant="subtle"
           icon="material-symbols:add"
-          @click="map.zoom++" />
+          @click="map.zoom++" title="拡大" />
           <br>
           <UButton color="neutral" size="xl" variant="subtle"
           icon="material-symbols:remove"
-          @click="map.zoom--" />
+          @click="map.zoom--" title="縮小" />
         </div>
       </LControl>
       <template v-for="marker in map.markers">
@@ -47,12 +47,12 @@
     <p>{{ this.distance }}km</p>
     <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-left"
-     @click="time_rewind('-month')" />
+     @click="time_rewind('-month')" title="前月に戻る" />
     <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:chevron-left"
-     @click="time_rewind('-day')" />
+     @click="time_rewind('-day')" title="前日に戻る" />
     <UPopover>
-      <UButton color="neutral" size="lg" variant="subtle" icon="i-lucide-calendar">
+      <UButton color="neutral" size="lg" variant="subtle" icon="i-lucide-calendar" title="日付を選択" >
         <template v-if="isOneDay()">
           {{ calendar.start.toString().replaceAll('-', '/') }}
         </template>
@@ -75,10 +75,10 @@
     </UPopover>
     <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:chevron-right"
-     @click="time_rewind('+day')" />
+     @click="time_rewind('+day')" title="翌日に進む" />
     <UButton color="neutral" size="lg" variant="subtle"
      icon="material-symbols:keyboard-double-arrow-right"
-     @click="time_rewind('+month')" />
+     @click="time_rewind('+month')" title="翌月に進む" />
   </div>
 </template>
 <style>
