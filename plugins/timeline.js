@@ -34,7 +34,7 @@ class DataList {
   };
 
   /* リストから値を取り出す */
-  getData(begin, end) {
+  getData(begin, end, skip=null) {
     let rtn = [];
     const b_year = begin.getFullYear();
     const b_month = begin.getMonth();
@@ -49,6 +49,9 @@ class DataList {
         if (value.time.begin < begin || value.time.end > end) {
           continue;
         }
+        if (skip?.(value.time.begin, value.time.end, value)) {
+          continue;
+        }
         rtn.push(value);
       }
     }
@@ -61,6 +64,8 @@ export class TimeLine {
   __activities = new DataList(); /* 移動履歴 */
   __min_time = null;
   __max_time = null;
+  __begin_new_style = null; /* 新書式の移動履歴による記録が開始された日時 */
+  __fix_google_bug = true; /* Googleマップのデータ飛び問題を修正するか否か */
 
   /* コントラクタ */
   constructor(time_line = null) {
@@ -88,6 +93,16 @@ export class TimeLine {
     }
   };
 
+  /* 新書式の移動履歴による記録が開始された日時を更新する */
+  __updateBeginNewStyle(style, begin) {
+    if (style !== 'new') {
+      return;
+    }
+    if (this.__begin_new_style === null || this.__begin_new_style > begin) {
+      this.__begin_new_style = begin;
+    }
+  };
+
   /* 訪問場所を追加する */
   addVisit(begin, end, latitude, longitude) {
     this.__updateMinMaxTime(begin, end);
@@ -112,7 +127,8 @@ export class TimeLine {
   };
 
   /* 移動履歴を追加する */
-  addActivity(begin, end, points) {
+  addActivity(begin, end, points, style='new') {
+    this.__updateBeginNewStyle(style, begin);
     this.__updateMinMaxTime(begin, end);
     let distance = 0.0;
     for (let i = 0; i < points.length - 1; i++) {
@@ -121,6 +137,7 @@ export class TimeLine {
       distance += this.__calcDistance(from_lat_lng, to_lat_lng);
     }
     this.__activities.push(begin, end, {
+      style: style,
       points: points,
       distance: distance,
     });
@@ -133,7 +150,17 @@ export class TimeLine {
 
   /* 移動履歴を取得する */
   getActivities(begin, end) {
-    return this.__activities.getData(begin, end);
+    /* Googleマップのデータ飛び問題を修正する部分 */
+    let skip_func = null;
+    if (this.__fix_google_bug) {
+      skip_func = (vbigin, vend, value) => {
+        if (this.__begin_new_style === null) {
+          return false;
+        }
+        return (vbigin > this.__begin_new_style && value?.style === 'old');
+      };
+    }
+    return this.__activities.getData(begin, end, skip_func);
   };
 
   /* 最小日時を取得する */

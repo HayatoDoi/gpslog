@@ -22,6 +22,10 @@
         <UButton color="neutral" size="xl" variant="subtle"
          icon="material-symbols:download"
          @click="modal.file_download = true" title="ファイルのダウンロード" />
+        <br>
+        <UButton color="neutral" size="xl" variant="subtle"
+         icon="material-symbols:settings-outline"
+         @click="modal.settings = true" title="設定を変更する" />
         <div class="zoom-menu">
           <UButton color="neutral" size="xl" variant="subtle"
           icon="material-symbols:add"
@@ -55,6 +59,12 @@
       <UButton :loading="modal.file_loading" class="file-upload-erea" icon="material-symbols:download"
        color="neutral" variant="outline" @click="download">ダウンロード</UButton>
       <p style="color:red"> {{ modal.file_error }}</p>
+    </template>
+  </UModal>
+  <UModal v-model:open="modal.settings" title="設定を変更する">
+    <template #body>
+      <UCheckbox v-model="this.raw_data.__fix_google_bug" @change="update_map"
+       size="lg" label="Googleマップのデータ飛び問題を修正する(β版)"/>
     </template>
   </UModal>
   <div class="bottom-menu">
@@ -166,6 +176,7 @@
           file_loading: false,
           file_error: '',
           file_download: false,
+          settings: false,
         },
         calendar: {
           start: new CalendarDate(

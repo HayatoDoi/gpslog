@@ -43,7 +43,7 @@ class TimeLineJson extends TimeLine {
             longitude: lat_lng[1],
           });
         }
-        this.addActivity(begin, end, points);
+        this.addActivity(begin, end, points, 'old');
       }
     }
   };
