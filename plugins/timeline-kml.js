@@ -2,7 +2,9 @@
  * Google My Mapなどでインポートできるkmlファイルを管理する
  */
 
-class TimeLineKml {
+import { TimeLine } from './timeline';
+
+class TimeLineKml extends TimeLine {
   __header = '<?xml version="1.0" encoding="UTF-8"?>';
   __kml;
   __upper_tag = [
@@ -13,15 +15,7 @@ class TimeLineKml {
     ['linestring', 'LineString'],
   ];
 
-  constructor() {
-    this.__kml = document.createElement('kml');
-    this.__kml.setAttribute('xmlns', 'http://www.opengis.net/kml/2.2');
-    this.__kml.setAttribute('xmlns:gx', 'http://www.google.com/kml/ext/2.2');
-    let _doc = document.createElement('document');
-    this.__kml.appendChild(_doc);
-  };
-
-  addPlace(name, latitude, longitude, begin, end) {
+  __addPlace(name, latitude, longitude, begin, end) {
     let _doc = this.__kml.getElementsByTagName('document')[0];
       let _placemark = document.createElement('placemark');
         let _name = document.createElement('name');
@@ -42,7 +36,8 @@ class TimeLineKml {
         _placemark.appendChild(_timespan);
     _doc.appendChild(_placemark);
   };
-  addLines(name, lines, begin, end) {
+
+  __addLines(name, points, begin, end) {
     let _doc = this.__kml.getElementsByTagName('document')[0];
       let _placemark = document.createElement('placemark');
         let _name = document.createElement('name');
@@ -50,9 +45,9 @@ class TimeLineKml {
         _placemark.appendChild(_name);
         let _linestring = document.createElement('linestring');
           let _coordinates = document.createElement('coordinates');
-          lines.forEach((line) => {
-            _coordinates.innerText += ` ${line[0]},${line[1]},0`;
-          });
+          for (const point of points) {
+            _coordinates.innerText += ` ${point.longitude},${point.latitude},0`;
+          }
           _linestring.appendChild(_coordinates);
         _placemark.appendChild(_linestring);
         let _timespan = document.createElement('timespan');
@@ -65,7 +60,30 @@ class TimeLineKml {
         _placemark.appendChild(_timespan);
     _doc.appendChild(_placemark);
   };
-  toString() {
+
+  toString(begin, end) {
+    this.__kml = document.createElement('kml');
+    this.__kml.setAttribute('xmlns', 'http://www.opengis.net/kml/2.2');
+    this.__kml.setAttribute('xmlns:gx', 'http://www.google.com/kml/ext/2.2');
+    let _doc = document.createElement('document');
+    this.__kml.appendChild(_doc);
+    const visits = this.getVisits(begin, end);
+    for (const visit of visits) {
+      this.__addPlace(
+        '',
+        visit.point.latitude,
+        visit.point.longitude,
+        visit.time.begin,
+        visit.time.end);
+    }
+    const activities = this.getActivities(begin, end);
+    for (const activity of activities) {
+      this.__addLines(
+        '',
+        activity.points,
+        activity.time.begin,
+        activity.time.end);
+    }
     let text = new XMLSerializer().serializeToString(this.__kml).replace(/\sxmlns="[^"]+"/, '');
     this.__upper_tag.forEach((value) => {
       text = text.replaceAll(`<${value[0]}>`, `<${value[1]}>`);

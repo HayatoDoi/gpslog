@@ -1,5 +1,6 @@
 <template>
-  <input id="file-input" type="file" hidden accept=".json" multiple @change="import_data">
+  <input id="file-import" type="file" hidden accept=".json" multiple @change="import_data">
+  <a id='file-export' hidden download='location-history.kml' @click="export_data"></a>
   <div class="map">
     <LMap
       ref="map"
@@ -17,6 +18,10 @@
         <UButton color="neutral" size="xl" variant="subtle"
          icon="material-symbols:attach-file-add"
          @click="modal.file_upload = true" title="ファイルのアップロード" />
+        <br>
+        <UButton color="neutral" size="xl" variant="subtle"
+         icon="material-symbols:download"
+         @click="modal.file_download = true" title="ファイルのダウンロード" />
         <div class="zoom-menu">
           <UButton color="neutral" size="xl" variant="subtle"
           icon="material-symbols:add"
@@ -41,6 +46,14 @@
       <p>jsonファイルのダウンロード方法は <a href="">こちら</a> 。</p>
       <UButton :loading="modal.file_loading" class="file-upload-erea" icon="material-symbols:attach-file-add"
        color="neutral" variant="outline" @click="upload">アップロード</UButton>
+      <p style="color:red"> {{ modal.file_error }}</p>
+    </template>
+  </UModal>
+  <UModal v-model:open="modal.file_download" title="ファイルのダウンロード">
+    <template #body>
+      <p>Google My Mapsなどに読み込ませることができるkmlファイルをダウンロードします。</p>
+      <UButton :loading="modal.file_loading" class="file-upload-erea" icon="material-symbols:download"
+       color="neutral" variant="outline" @click="download">ダウンロード</UButton>
       <p style="color:red"> {{ modal.file_error }}</p>
     </template>
   </UModal>
@@ -152,6 +165,7 @@
           file_upload: true,
           file_loading: false,
           file_error: '',
+          file_download: false,
         },
         calendar: {
           start: new CalendarDate(
@@ -198,7 +212,7 @@
       /* アップロードボタンが押されたときに呼び出される関数 */
       upload() {
         /* input要素を強制発火させる */
-        const elem = document.getElementById('file-input');
+        const elem = document.getElementById('file-import');
         elem.click();
       },
       /* ファイルのアップロード時に呼び出される関数 */
@@ -224,6 +238,33 @@
           this.modal.file_loading = false;
           return;
         }
+        this.modal = {};
+      },
+      download() {
+        /* a要素を強制発火させる */
+        const elem = document.getElementById('file-export');
+        elem.click();
+      },
+      export_data() {
+        this.modal.file_loading = true;
+        // try {
+          /* 日付の計算 */
+          const begin = this.calendar.start.toDate();
+          let end = this.calendar.end.toDate();
+          end.setDate(end.getDate() + 1);
+          end.setSeconds(end.getSeconds() - 1);
+          let kml = new this.$TimeLineKml(this.raw_data);
+          const content = kml.toString(begin, end);
+          /* ダウウンロード開始 */
+          const elem = document.getElementById('file-export');
+          let blob = new Blob([content], { type: 'text/plain' });
+          elem.href = window.URL.createObjectURL(blob);
+        // }
+        // catch (error) {
+        //   this.modal.file_error = 'ファイルの生成に失敗しました';
+        //   this.modal.file_loading = false;
+        //   return;
+        // }
         this.modal = {};
       },
       /* 選択された日付が一日か否か */

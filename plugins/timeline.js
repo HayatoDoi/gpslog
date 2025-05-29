@@ -62,6 +62,22 @@ export class TimeLine {
   __min_time = null;
   __max_time = null;
 
+  /* コントラクタ */
+  constructor(time_line = null) {
+    if (time_line?.__visits !== undefined) {
+      this.__visits = time_line.__visits;
+    }
+    if (time_line?.__activities !== undefined) {
+      this.__activities = time_line.__activities;
+    }
+    if (time_line?.__min_time !== undefined) {
+      this.__min_time = time_line.__min_time;
+    }
+    if (time_line?.__max_time !== undefined) {
+      this.__max_time = time_line.__max_time;
+    }
+  };
+
   /* タイムライン日時の最大・最小を更新する */
   __updateMinMaxTime(begin, end) {
     if (this.__min_time === null || begin < this.__min_time) {
