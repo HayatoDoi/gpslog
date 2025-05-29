@@ -247,7 +247,7 @@
       },
       export_data() {
         this.modal.file_loading = true;
-        // try {
+        try {
           /* 日付の計算 */
           const begin = this.calendar.start.toDate();
           let end = this.calendar.end.toDate();
@@ -259,12 +259,12 @@
           const elem = document.getElementById('file-export');
           let blob = new Blob([content], { type: 'text/plain' });
           elem.href = window.URL.createObjectURL(blob);
-        // }
-        // catch (error) {
-        //   this.modal.file_error = 'ファイルの生成に失敗しました';
-        //   this.modal.file_loading = false;
-        //   return;
-        // }
+        }
+        catch (error) {
+          this.modal.file_error = 'ファイルの生成に失敗しました';
+          this.modal.file_loading = false;
+          return;
+        }
         this.modal = {};
       },
       /* 選択された日付が一日か否か */
