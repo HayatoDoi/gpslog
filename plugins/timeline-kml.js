@@ -18,6 +18,19 @@ const UPPER_TAGS = [
 class TimeLineKml extends TimeLine {
   __kml = null;
 
+  /* 時刻情報をdescriptionから取得する */
+  __get_time_from_description(description) {
+    if (description == undefined) {
+      throw new Error(
+        'Invalid KML format: missing <TimeSpan> or </description> tag');
+    }
+    const ret_form = description.match(/from\s+(?<from>[^\s]*)/);
+    const ret_to = description.match(/to\s+(?<to>[^\s\.]*)/);
+    const begin = new Date(ret_form.groups.from);
+    const end = new Date(ret_to.groups.to);
+    return [begin, end];
+  }
+
   /* kmlファイルを読み込む */
   load(test) {
     const parser = new DOMParser();
@@ -30,15 +43,24 @@ class TimeLineKml extends TimeLine {
     const placemarks = doc.getElementsByTagName('Placemark');
     for (const placemark of placemarks) {
       const name = placemark.getElementsByTagName('name')[0]?.textContent || '';
+      const timespan = placemark.getElementsByTagName('TimeSpan')[0];
+      const description = placemark.getElementsByTagName('description')[0]?.textContent;
+      let begin, end;
+      /* Googleマップからエクスポートしたkmlファイル */
+      if (timespan) {
+        begin = new Date(timespan.getElementsByTagName('begin')[0].textContent);
+        end = new Date(timespan.getElementsByTagName('end')[0].textContent);
+      }
+      /* Google Myマップからエクスポートしたkmlファイル */
+      else {
+        [begin, end] = this.__get_time_from_description(description);
+      }
       const point = placemark.getElementsByTagName('Point')[0];
       const linestring = placemark.getElementsByTagName('LineString')[0];
       if (point) {
         const coordinates = point.getElementsByTagName('coordinates')[0].textContent.split(',');
         const latitude = parseFloat(coordinates[1]);
         const longitude = parseFloat(coordinates[0]);
-        const timespan = placemark.getElementsByTagName('TimeSpan')[0];
-        const begin = new Date(timespan.getElementsByTagName('begin')[0].textContent);
-        const end = new Date(timespan.getElementsByTagName('end')[0].textContent);
         this.addVisit(begin, end, latitude, longitude);
       }
       if (linestring) {
@@ -47,9 +69,6 @@ class TimeLineKml extends TimeLine {
           const [longitude, latitude] = coord.split(',').map(Number);
           return { latitude, longitude };
         });
-        const timespan = placemark.getElementsByTagName('TimeSpan')[0];
-        const begin = new Date(timespan.getElementsByTagName('begin')[0].textContent);
-        const end = new Date(timespan.getElementsByTagName('end')[0].textContent);
         this.addActivity(begin, end, points);
       }
     }

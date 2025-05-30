@@ -110,11 +110,11 @@ export class TimeLine {
 
   /* タイムライン日時の最大・最小を更新する */
   __updateMinMaxTime(begin, end) {
-    if (this.__min_time === null || begin < this.__min_time) {
-      this.__min_time = begin;
+    if (this.__min_time === null || end < this.__min_time) {
+      this.__min_time = end;
     }
-    if (this.__max_time === null || end > this.__max_time) {
-      this.__max_time = end;
+    if (this.__max_time === null || begin > this.__max_time) {
+      this.__max_time = begin;
     }
   }
 
