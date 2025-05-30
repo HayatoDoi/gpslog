@@ -245,6 +245,7 @@
           this.update_map();
         }
         catch (error) {
+          console.error(error);
           this.modal.file_error = 'ファイルの読み込みに失敗しました';
           this.modal.file_loading = false;
           return;
@@ -272,6 +273,7 @@
           elem.href = window.URL.createObjectURL(blob);
         }
         catch (error) {
+          console.error(error);
           this.modal.file_error = 'ファイルの生成に失敗しました';
           this.modal.file_loading = false;
           return;
