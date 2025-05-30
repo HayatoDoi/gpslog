@@ -14,9 +14,8 @@ class DataList {
     return [y, m, d];
   }
 
-  /* リストに値を追加する */
-  push(begin, end, value) {
-    const [y, m, d] = this.__getListIndex(begin);
+  /* リスト内に空配列を作成する */
+  __createEmptyList(y, m, d) {
     if (this.__list[y] === undefined) {
       this.__list[y] = {};
     }
@@ -26,10 +25,34 @@ class DataList {
     if (this.__list[y][m][d] === undefined) {
       this.__list[y][m][d] = [];
     }
+  }
+
+  /* リストにリストを結合する */
+  concat(data_list) {
+    const arg_list = data_list?.__list;
+    if (arg_list === undefined) {
+      return;
+    }
+    for (const y of Object.keys(arg_list)) {
+     for (const m of Object.keys(arg_list[y])) {
+        for (const d of Object.keys(arg_list[y][m])) {
+          const value = arg_list[y][m][d];
+          this.__createEmptyList(y, m, d);
+          this.__list[y][m][d] =
+            this.__list[y][m][d].concat(value);
+        }
+      }
+    }
+  }
+
+  /* リストに値を追加する */
+  push(begin, end, value) {
+    const [y, m, d] = this.__getListIndex(begin);
     value['time'] = {
       begin: begin,
       end: end,
     };
+    this.__createEmptyList(y, m, d);
     this.__list[y][m][d].push(value);
   }
 
@@ -68,18 +91,20 @@ export class TimeLine {
   __fix_google_bug = true; /* Googleマップのデータ飛び問題を修正するか否か */
 
   /* コントラクタ */
-  constructor(time_line = null) {
-    if (time_line?.__visits !== undefined) {
-      this.__visits = time_line.__visits;
-    }
-    if (time_line?.__activities !== undefined) {
-      this.__activities = time_line.__activities;
-    }
-    if (time_line?.__min_time !== undefined) {
-      this.__min_time = time_line.__min_time;
-    }
-    if (time_line?.__max_time !== undefined) {
-      this.__max_time = time_line.__max_time;
+  constructor(...time_lines) {
+    for (const time_line of time_lines) {
+      this.__visits.concat(time_line?.__visits);
+      this.__activities.concat(time_line?.__activities);
+      if (this.__min_time === null ||
+          (time_line.__min_time !== null &&
+          this.__min_time > time_line.__min_time)) {
+        this.__min_time = time_line.__min_time;
+      }
+      if (this.__max_time === null ||
+          (time_line.__max_time !== null &&
+          this.__max_time < time_line.__max_time)) {
+        this.__max_time = time_line.__max_time;
+      }
     }
   }
 

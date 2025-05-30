@@ -1,5 +1,5 @@
 <template>
-  <input id="file-import" type="file" hidden accept=".json" multiple @change="import_data">
+  <input id="file-import" type="file" hidden accept=".json,.kml" multiple @change="import_data">
   <a id='file-export' hidden download='location-history.kml' @click="export_data"></a>
   <div class="map">
     <LMap
@@ -230,12 +230,19 @@
       async import_data(e) {
         this.modal.file_loading = true;
         try {
-          this.raw_data = new this.$TimeLineJson();
+          let time_line_json = new this.$TimeLineJson();
+          let time_line_kml = new this.$TimeLineKml();
           const files = e.target.files;
           for (const file of files) {
             const text = await file.text();
-            this.raw_data.load(text);
+            if (file.name.endsWith('.kml')) {
+              time_line_kml.load(text);
+            }
+            if (file.name.endsWith('.json')) {
+              time_line_json.load(text);
+            }
           }
+          this.raw_data = new this.$TimeLine(time_line_json, time_line_kml);
           const current_date = this.raw_data.getMaxDate();
           const year = current_date.getFullYear();
           const month = current_date.getMonth() + 1;

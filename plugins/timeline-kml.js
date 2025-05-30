@@ -18,6 +18,43 @@ const UPPER_TAGS = [
 class TimeLineKml extends TimeLine {
   __kml = null;
 
+  /* kmlファイルを読み込む */
+  load(test) {
+    const parser = new DOMParser();
+    this.__kml = parser.parseFromString(test, 'application/xml');
+    const doc = this.__kml.getElementsByTagName('Document')[0];
+    if (!doc) {
+      throw new Error('Invalid KML format: missing <Document> tag');
+    }
+
+    const placemarks = doc.getElementsByTagName('Placemark');
+    for (const placemark of placemarks) {
+      const name = placemark.getElementsByTagName('name')[0]?.textContent || '';
+      const point = placemark.getElementsByTagName('Point')[0];
+      const linestring = placemark.getElementsByTagName('LineString')[0];
+      if (point) {
+        const coordinates = point.getElementsByTagName('coordinates')[0].textContent.split(',');
+        const latitude = parseFloat(coordinates[1]);
+        const longitude = parseFloat(coordinates[0]);
+        const timespan = placemark.getElementsByTagName('TimeSpan')[0];
+        const begin = new Date(timespan.getElementsByTagName('begin')[0].textContent);
+        const end = new Date(timespan.getElementsByTagName('end')[0].textContent);
+        this.addVisit(begin, end, latitude, longitude);
+      }
+      if (linestring) {
+        const coordinatesText = linestring.getElementsByTagName('coordinates')[0].textContent;
+        const points = coordinatesText.trim().split(/\s+/).map(coord => {
+          const [longitude, latitude] = coord.split(',').map(Number);
+          return { latitude, longitude };
+        });
+        const timespan = placemark.getElementsByTagName('TimeSpan')[0];
+        const begin = new Date(timespan.getElementsByTagName('begin')[0].textContent);
+        const end = new Date(timespan.getElementsByTagName('end')[0].textContent);
+        this.addActivity(begin, end, points);
+      }
+    }
+  }
+
   __createElement(tag, text) {
     const el = document.createElement(tag);
     if (text !== undefined) el.innerText = text;
