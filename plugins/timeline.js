@@ -12,7 +12,7 @@ class DataList {
     const m = String(date.getMonth() + 1);
     const d = String(date.getDate());
     return [y, m, d];
-  };
+  }
 
   /* リストに値を追加する */
   push(begin, end, value) {
@@ -31,7 +31,7 @@ class DataList {
       end: end,
     };
     this.__list[y][m][d].push(value);
-  };
+  }
 
   /* リストから値を取り出す */
   getData(begin, end, skip=null) {
@@ -56,7 +56,7 @@ class DataList {
       }
     }
     return rtn;
-  };
+  }
 }
 
 export class TimeLine {
@@ -81,7 +81,7 @@ export class TimeLine {
     if (time_line?.__max_time !== undefined) {
       this.__max_time = time_line.__max_time;
     }
-  };
+  }
 
   /* タイムライン日時の最大・最小を更新する */
   __updateMinMaxTime(begin, end) {
@@ -91,7 +91,7 @@ export class TimeLine {
     if (this.__max_time === null || end > this.__max_time) {
       this.__max_time = end;
     }
-  };
+  }
 
   /* 新書式の移動履歴による記録が開始された日時を更新する */
   __updateBeginNewStyle(style, begin) {
@@ -101,7 +101,7 @@ export class TimeLine {
     if (this.__begin_new_style === null || this.__begin_new_style > begin) {
       this.__begin_new_style = begin;
     }
-  };
+  }
 
   /* 訪問場所を追加する */
   addVisit(begin, end, latitude, longitude) {
@@ -112,7 +112,7 @@ export class TimeLine {
         longitude: longitude,
       }
     });
-  };
+  }
 
   /* 2点間の距離(メートル)を計算する */
   __calcDistance(a, b) {
@@ -124,7 +124,7 @@ export class TimeLine {
     _b[1] = parseFloat(b.longitude);
     let r = geod.Inverse(_a[0], _a[1], _b[0], _b[1]);
     return parseFloat(r.s12);
-  };
+  }
 
   /* 移動履歴を追加する */
   addActivity(begin, end, points, style='new') {
@@ -141,12 +141,12 @@ export class TimeLine {
       points: points,
       distance: distance,
     });
-  };
+  }
 
   /* 訪問場所を取得する */
   getVisits(begin, end) {
     return this.__visits.getData(begin, end);
-  };
+  }
 
   /* 移動履歴を取得する */
   getActivities(begin, end) {
@@ -161,17 +161,17 @@ export class TimeLine {
       };
     }
     return this.__activities.getData(begin, end, skip_func);
-  };
+  }
 
   /* 最小日時を取得する */
   getMinDate() {
     return this.__min_time;
-  };
+  }
 
   /* 最大日時を取得する */
   getMaxDate() {
     return this.__max_time;
-  };
+  }
 
   /* 移動距離を取得する */
   getDistance(begin, end) {
@@ -181,13 +181,9 @@ export class TimeLine {
       distance += activity.distance;
     }
     return Math.floor(distance) / 1000; /* m->km変換&小数点の切り捨て */
-  };
+  }
 }
 
-export default defineNuxtPlugin((_nuxtApp) => {
-  return {
-    provide: {
-      TimeLine,
-    }
-  }
-});
+export default defineNuxtPlugin(() => ({
+  provide: { TimeLine }
+}));

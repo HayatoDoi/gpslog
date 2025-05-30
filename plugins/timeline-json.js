@@ -46,7 +46,7 @@ class TimeLineJson extends TimeLine {
         this.addActivity(begin, end, points, 'old');
       }
     }
-  };
+  }
 
   /* 移動履歴を解析する */
   __parseSemantics(obj) {
@@ -60,7 +60,7 @@ class TimeLineJson extends TimeLine {
       semantics = obj['semanticSegments'];
     }
     return semantics;
-  };
+  }
 
   /* 緯度・経度を解析する */
   __parseLatLng(obj) {
@@ -81,7 +81,7 @@ class TimeLineJson extends TimeLine {
       lat_lng = text.replaceAll('°', '').split(',');
     }
     return lat_lng;
-  };
+  }
 
   /* 値を取得するときのフィルター */
   __get_filter(begin, end, arr) {
@@ -93,13 +93,9 @@ class TimeLineJson extends TimeLine {
       rtn.push(value);
     }
     return rtn;
-  };
+  }
 }
 
-export default defineNuxtPlugin((_nuxtApp) => {
-  return {
-    provide: {
-      TimeLineJson,
-    }
-  }
-});
+export default defineNuxtPlugin(() => ({
+  provide: { TimeLineJson }
+}));

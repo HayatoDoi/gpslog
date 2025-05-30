@@ -4,99 +4,99 @@
 
 import { TimeLine } from './timeline';
 
+const KML_NAMESPACE = 'http://www.opengis.net/kml/2.2';
+const GX_NAMESPACE = 'http://www.google.com/kml/ext/2.2';
+const XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>';
+const UPPER_TAGS = [
+  ['document', 'Document'],
+  ['placemark', 'Placemark'],
+  ['point', 'Point'],
+  ['timespan', 'TimeSpan'],
+  ['linestring', 'LineString'],
+];
+
 class TimeLineKml extends TimeLine {
-  __header = '<?xml version="1.0" encoding="UTF-8"?>';
-  __kml;
-  __upper_tag = [
-    ['document', 'Document'],
-    ['placemark', 'Placemark'],
-    ['point', 'Point'],
-    ['timespan', 'TimeSpan'],
-    ['linestring', 'LineString'],
-  ];
+  __kml = null;
+
+  __createElement(tag, text) {
+    const el = document.createElement(tag);
+    if (text !== undefined) el.innerText = text;
+    return el;
+  }
 
   __addPlace(name, latitude, longitude, begin, end) {
-    let _doc = this.__kml.getElementsByTagName('document')[0];
-      let _placemark = document.createElement('placemark');
-        let _name = document.createElement('name');
-        _name.innerText = name;
-        _placemark.appendChild(_name);
-        let _point = document.createElement('point');
-          let _coordinates = document.createElement('coordinates');
-          _coordinates.innerText = `${longitude},${latitude},0`;
-          _point.appendChild(_coordinates);
-        _placemark.appendChild(_point);
-        let _timespan = document.createElement('timespan');
-          let _begin = document.createElement('begin');
-          _begin.innerText = begin.toISOString();
-          _timespan.appendChild(_begin);
-          let _end = document.createElement('end');
-          _end.innerText = end.toISOString();
-          _timespan.appendChild(_end);
-        _placemark.appendChild(_timespan);
-    _doc.appendChild(_placemark);
-  };
+    const doc = this.__kml.getElementsByTagName('document')[0];
+    const placemark = this.__createElement('placemark');
+    placemark.appendChild(this.__createElement('name', name));
+
+    const point = this.__createElement('point');
+    point.appendChild(this.__createElement('coordinates', `${longitude},${latitude},0`));
+    placemark.appendChild(point);
+
+    const timespan = this.__createElement('timespan');
+    timespan.appendChild(this.__createElement('begin', begin.toISOString()));
+    timespan.appendChild(this.__createElement('end', end.toISOString()));
+    placemark.appendChild(timespan);
+
+    doc.appendChild(placemark);
+  }
 
   __addLines(name, points, begin, end) {
-    let _doc = this.__kml.getElementsByTagName('document')[0];
-      let _placemark = document.createElement('placemark');
-        let _name = document.createElement('name');
-        _name.innerText = name;
-        _placemark.appendChild(_name);
-        let _linestring = document.createElement('linestring');
-          let _coordinates = document.createElement('coordinates');
-          for (const point of points) {
-            _coordinates.innerText += ` ${point.longitude},${point.latitude},0`;
-          }
-          _linestring.appendChild(_coordinates);
-        _placemark.appendChild(_linestring);
-        let _timespan = document.createElement('timespan');
-          let _begin = document.createElement('begin');
-          _begin.innerText = begin.toISOString();
-          _timespan.appendChild(_begin);
-          let _end = document.createElement('end');
-          _end.innerText = end.toISOString();
-          _timespan.appendChild(_end);
-        _placemark.appendChild(_timespan);
-    _doc.appendChild(_placemark);
-  };
+    const doc = this.__kml.getElementsByTagName('document')[0];
+    const placemark = this.__createElement('placemark');
+    placemark.appendChild(this.__createElement('name', name));
+
+    const linestring = this.__createElement('linestring');
+    const coordinates = this.__createElement('coordinates', points.map(
+      p => `${p.longitude},${p.latitude},0`
+    ).join(' '));
+    linestring.appendChild(coordinates);
+    placemark.appendChild(linestring);
+
+    const timespan = this.__createElement('timespan');
+    timespan.appendChild(this.__createElement('begin', begin.toISOString()));
+    timespan.appendChild(this.__createElement('end', end.toISOString()));
+    placemark.appendChild(timespan);
+
+    doc.appendChild(placemark);
+  }
 
   toString(begin, end) {
     this.__kml = document.createElement('kml');
-    this.__kml.setAttribute('xmlns', 'http://www.opengis.net/kml/2.2');
-    this.__kml.setAttribute('xmlns:gx', 'http://www.google.com/kml/ext/2.2');
-    let _doc = document.createElement('document');
-    this.__kml.appendChild(_doc);
-    const visits = this.getVisits(begin, end);
-    for (const visit of visits) {
+    this.__kml.setAttribute('xmlns', KML_NAMESPACE);
+    this.__kml.setAttribute('xmlns:gx', GX_NAMESPACE);
+
+    const doc = document.createElement('document');
+    this.__kml.appendChild(doc);
+
+    this.getVisits(begin, end).forEach(visit => {
       this.__addPlace(
         '',
         visit.point.latitude,
         visit.point.longitude,
         visit.time.begin,
-        visit.time.end);
-    }
-    const activities = this.getActivities(begin, end);
-    for (const activity of activities) {
+        visit.time.end
+      );
+    });
+
+    this.getActivities(begin, end).forEach(activity => {
       this.__addLines(
         '',
         activity.points,
         activity.time.begin,
-        activity.time.end);
-    }
-    let text = new XMLSerializer().serializeToString(this.__kml).replace(/\sxmlns="[^"]+"/, '');
-    this.__upper_tag.forEach((value) => {
-      text = text.replaceAll(`<${value[0]}>`, `<${value[1]}>`);
-      text = text.replaceAll(`</${value[0]}>`, `</${value[1]}>`);
+        activity.time.end
+      );
     });
-    return this.__header + '\n' + text;
-  };
+
+    let text = new XMLSerializer().serializeToString(this.__kml).replace(/\sxmlns="[^"]+"/, '');
+    UPPER_TAGS.forEach(([lower, upper]) => {
+      text = text.replaceAll(`<${lower}>`, `<${upper}>`);
+      text = text.replaceAll(`</${lower}>`, `</${upper}>`);
+    });
+    return XML_HEADER + '\n' + text;
+  }
 }
 
-export default defineNuxtPlugin((_nuxtApp) => {
-  return {
-    provide: {
-      TimeLineKml,
-    }
-  }
-});
+export default defineNuxtPlugin(() => ({
+  provide: { TimeLineKml }
+}));
