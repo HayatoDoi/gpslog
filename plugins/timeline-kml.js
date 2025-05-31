@@ -117,7 +117,7 @@ class TimeLineKml extends TimeLine {
     doc.appendChild(placemark);
   }
 
-  toString(begin, end) {
+  toString(begin, end, filter=null) {
     this.__kml = document.createElement('kml');
     this.__kml.setAttribute('xmlns', KML_NAMESPACE);
     this.__kml.setAttribute('xmlns:gx', GX_NAMESPACE);
@@ -125,7 +125,7 @@ class TimeLineKml extends TimeLine {
     const doc = document.createElement('document');
     this.__kml.appendChild(doc);
 
-    this.getVisits(begin, end).forEach(visit => {
+    this.getVisits(begin, end, filter).forEach(visit => {
       this.__addPlace(
         '',
         visit.point.latitude,
@@ -135,7 +135,7 @@ class TimeLineKml extends TimeLine {
       );
     });
 
-    this.getActivities(begin, end).forEach(activity => {
+    this.getActivities(begin, end, filter).forEach(activity => {
       this.__addLines(
         '',
         activity.points,

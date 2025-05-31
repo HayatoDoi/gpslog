@@ -63,7 +63,7 @@
   </UModal>
   <UModal v-model:open="modal.settings" title="設定を変更する">
     <template #body>
-      <UCheckbox v-model="this.raw_data.__fix_google_bug" @change="update_map"
+      <UCheckbox v-model="settings.is_fix_google_bug" @change="update_map"
        size="lg" label="Googleマップのデータ飛び問題を修正する(β版)"/>
     </template>
   </UModal>
@@ -194,6 +194,10 @@
           }),
           zoom: DEFINES.DEFAULT_ZOOM,
         },
+        settings: {
+          /* Googleマップのデータ飛び問題を修正するか否か */
+          is_fix_google_bug: true,
+        },
         distance: 0.0,
         timeoutID: {
           zoom: -1,
@@ -273,7 +277,12 @@
           end.setDate(end.getDate() + 1);
           end.setSeconds(end.getSeconds() - 1);
           let kml = new this.$TimeLineKml(this.raw_data);
-          const content = kml.toString(begin, end);
+          let filter = null;
+          if (this.settings.is_fix_google_bug) {
+            /* Googleマップのデータ飛び問題を修正する */
+            filter = (b, e, v) => (v.user_handle?.style === 'old');
+          }
+          const content = kml.toString(begin, end, filter);
           /* ダウウンロード開始 */
           const elem = document.getElementById('file-export');
           let blob = new Blob([content], { type: 'text/plain' });
@@ -340,7 +349,12 @@
         }
         /* ラインの更新 */
         this.map.lines = [];
-        const activities = this.raw_data.getActivities(begin, end);
+        let filter = null;
+        if (this.settings.is_fix_google_bug) {
+          /* Googleマップのデータ飛び問題を修正する */
+          filter = (b, e, v) => (v.user_handle?.style === 'old');
+        }
+        const activities = this.raw_data.getActivities(begin, end, filter);
         for (const activitiy of activities) {
           let line = [];
           for (const point of activitiy.points) {

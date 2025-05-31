@@ -30,7 +30,7 @@ class TimeLineJson extends TimeLine {
             longitude: lat_lng[1],
           });
         }
-        this.addActivity(begin, end, points);
+        this.addActivity(begin, end, points, {style: 'new'});
       }
       /* 移動履歴(old style) */
       else if (semantic.activity !== undefined) {
@@ -43,7 +43,7 @@ class TimeLineJson extends TimeLine {
             longitude: lat_lng[1],
           });
         }
-        this.addActivity(begin, end, points, 'old');
+        this.addActivity(begin, end, points, {style: 'old'});
       }
     }
   }
