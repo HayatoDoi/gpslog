@@ -27,22 +27,29 @@ class DataList {
     }
   }
 
+  /* リストを1つ1つ処理する */
+  listLoop(func, l=this.__list) {
+    for (const y of Object.keys(l)) {
+      for (const m of Object.keys(l[y])) {
+        for (const d of Object.keys(l[y][m])) {
+          for (const value of l[y][m][d]) {
+            func(value, y, m, d);
+          }
+        }
+      }
+    }
+  }
+
   /* リストにリストを結合する */
   concat(data_list) {
     const arg_list = data_list?.__list;
     if (arg_list === undefined) {
       return;
     }
-    for (const y of Object.keys(arg_list)) {
-     for (const m of Object.keys(arg_list[y])) {
-        for (const d of Object.keys(arg_list[y][m])) {
-          const value = arg_list[y][m][d];
-          this.__createEmptyList(y, m, d);
-          this.__list[y][m][d] =
-            this.__list[y][m][d].concat(value);
-        }
-      }
-    }
+    this.listLoop((value, y, m, d) => {
+      this.__createEmptyList(y, m, d);
+      this.__list[y][m][d].push(value);
+    }, arg_list);
   }
 
   /* リストに値を追加する */
