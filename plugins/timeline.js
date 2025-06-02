@@ -184,9 +184,9 @@ export class TimeLine {
   }
 
   /* 移動距離を取得する */
-  getDistance(begin, end) {
+  getDistance(begin, end, filter=null) {
     let distance = 0.0;
-    const activities = this.getActivities(begin, end);
+    const activities = this.getActivities(begin, end, filter);
     for (const activity of activities) {
       distance += activity.distance;
     }

@@ -63,7 +63,7 @@
   </UModal>
   <UModal v-model:open="modal.settings" title="設定を変更する">
     <template #body>
-      <UCheckbox v-model="settings.is_fix_google_bug" @change="update_map"
+      <UCheckbox v-model="settings.is_fix_google_bug" @change="update_settings"
        size="lg" label="Googleマップのデータ飛び問題を修正する(β版)"/>
     </template>
   </UModal>
@@ -167,6 +167,7 @@
       MONTH: new Date().getMonth() + 1,
       DAY: new Date().getDate(),
     },
+    GOOGLE_BUG_FIX_FILTER: (b, e, v) => (v.user_handle?.style === 'old'),
   };
   export default {
     data() {
@@ -197,6 +198,7 @@
         settings: {
           /* Googleマップのデータ飛び問題を修正するか否か */
           is_fix_google_bug: true,
+          filter: DEFINES.GOOGLE_BUG_FIX_FILTER,
         },
         distance: 0.0,
         timeoutID: {
@@ -206,13 +208,21 @@
       }
     },
     methods: {
+      update_settings() {
+        this.settings.filter = null;
+        if (this.settings.is_fix_google_bug == true) {
+          this.settings.filter = DEFINES.GOOGLE_BUG_FIX_FILTER;
+        }
+        this.update_map();
+      },
       /* カレンダー上に表示するチップサイズを計算する関数 */
       getCalenderChip(calendar_date) {
         const begin = calendar_date.toDate();
         let end = calendar_date.toDate();
         end.setDate(end.getDate() + 1);
         end.setSeconds(end.getSeconds() - 1);
-        const distance = this.raw_data.getDistance(begin, end);
+        const distance = this.raw_data.getDistance(begin, end,
+          this.settings.filter);
         if (distance < 1.0) {
           return undefined;
         }
@@ -277,12 +287,7 @@
           end.setDate(end.getDate() + 1);
           end.setSeconds(end.getSeconds() - 1);
           let kml = new this.$TimeLineKml(this.raw_data);
-          let filter = null;
-          if (this.settings.is_fix_google_bug) {
-            /* Googleマップのデータ飛び問題を修正する */
-            filter = (b, e, v) => (v.user_handle?.style === 'old');
-          }
-          const content = kml.toString(begin, end, filter);
+          const content = kml.toString(begin, end, this.map.filter);
           /* ダウウンロード開始 */
           const elem = document.getElementById('file-export');
           let blob = new Blob([content], { type: 'text/plain' });
@@ -337,10 +342,12 @@
         end.setDate(end.getDate() + 1);
         end.setSeconds(end.getSeconds() - 1);
         /* 距離の更新 */
-        this.distance = this.raw_data.getDistance(begin, end);
+        this.distance = this.raw_data.getDistance(begin, end,
+          this.settings.filter);
         /* マーカーの更新 */
         this.map.markers = [];
-        const visits = this.raw_data.getVisits(begin, end);
+        const visits = this.raw_data.getVisits(begin, end,
+          this.settings.filter);
         for (const visit of visits) {
           this.map.markers.push([
             visit.point.latitude,
@@ -349,12 +356,8 @@
         }
         /* ラインの更新 */
         this.map.lines = [];
-        let filter = null;
-        if (this.settings.is_fix_google_bug) {
-          /* Googleマップのデータ飛び問題を修正する */
-          filter = (b, e, v) => (v.user_handle?.style === 'old');
-        }
-        const activities = this.raw_data.getActivities(begin, end, filter);
+        const activities = this.raw_data.getActivities(begin, end,
+          this.settings.filter);
         for (const activitiy of activities) {
           let line = [];
           for (const point of activitiy.points) {
